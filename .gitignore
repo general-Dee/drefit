@@ -1,4 +1,4 @@
-echo "# Dependencies
+﻿# Dependencies
 node_modules/
 .pnpm-store/
 
@@ -30,4 +30,7 @@ next-env.d.ts
 
 # Appwrite local dev (if any)
 appwrite/
-" > .gitignore
+
+# IDE
+.vscode/
+.idea/

@@ -6,6 +6,7 @@ import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
+import { isAdminEmail } from "@/lib/admin"
 
 const registerSchema = z.object({
   name: z.string().min(1),
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
       name,
       email,
       password: hashedPassword,
-      role: "user",
+      role: isAdminEmail(email) ? "admin" : "user",
       subscriptionStatus: "trialing",
       trialEndsAt,
     })

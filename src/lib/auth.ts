@@ -10,6 +10,7 @@ import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
+import { isAdminEmail } from "@/lib/admin"
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(6) })
 
@@ -36,7 +37,7 @@ async function findOrCreateGoogleUser(email: string, name: string): Promise<Appw
     name,
     email,
     password: unusablePassword,
-    role: "user",
+    role: isAdminEmail(email) ? "admin" : "user",
     subscriptionStatus: "trialing",
     trialEndsAt,
   })

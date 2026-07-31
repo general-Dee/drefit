@@ -29,7 +29,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Appwrite local dev (if any)
-appwrite/
+/appwrite/
 
 # IDE
 .vscode/

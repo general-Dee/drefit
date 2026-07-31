@@ -2,6 +2,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { ChevronRight, Dumbbell, Apple, Users, TrendingUp } from "lucide-react"
+import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
 
 export default function Home() {
   const features = [
@@ -54,7 +55,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl mb-4">Simple, Transparent Pricing</h2>
           <div className="glass-card p-8 max-w-md mx-auto">
-            <div className="text-4xl font-bold mb-2">₦5,000</div>
+            <div className="text-4xl font-bold mb-2">₦{PLAN_PRICE_NGN.toLocaleString()}</div>
             <div className="text-gray-400 mb-6">per month</div>
             <ul className="text-left space-y-2 mb-6">
               <li>✓ Personalized workout plans</li>

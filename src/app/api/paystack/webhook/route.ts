@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { serverDatabases } from "@/lib/appwrite/server"; // we'll create this
+import { Query } from "node-appwrite";
+import { serverDatabases } from "@/lib/appwrite/server";
+import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema";
+import { PLAN_PERIOD_DAYS } from "@/lib/paystack/plan";
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,9 +36,9 @@ export async function POST(req: NextRequest) {
 
       // 4. Find user in Appwrite by email
       const users = await serverDatabases.listDocuments(
-        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-        "users",
-        [ `email=${email}` ]
+        DATABASE_ID,
+        USERS_COLLECTION_ID,
+        [Query.equal("email", email)]
       );
 
       if (users.documents.length === 0) {
@@ -45,14 +48,22 @@ export async function POST(req: NextRequest) {
 
       const userId = users.documents[0].$id;
 
+      // Base the period on the charge's own timestamp, not the time the
+      // webhook happens to be delivered/retried.
+      const paidAt = data.paid_at ? new Date(data.paid_at) : new Date();
+      const subscriptionCurrentPeriodEnd = new Date(
+        paidAt.getTime() + PLAN_PERIOD_DAYS * 24 * 60 * 60 * 1000
+      ).toISOString();
+
       // 5. Update subscription status
       await serverDatabases.updateDocument(
-        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-        "users",
+        DATABASE_ID,
+        USERS_COLLECTION_ID,
         userId,
         {
           subscriptionStatus: "active",
           subscriptionId: subscriptionId,
+          subscriptionCurrentPeriodEnd,
         }
       );
 

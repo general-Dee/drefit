@@ -1,53 +1,70 @@
 ﻿"use client"
-import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { motion, AnimatePresence } from "framer-motion"
-import { Target, Activity, Utensils, Calendar, ChevronRight } from "lucide-react"
+import { useSession } from "next-auth/react"
+import toast from "react-hot-toast"
 
-const steps = [
-  { id: 0, title: "Fitness Goal", icon: Target, options: ["Weight Loss", "Muscle Gain", "Endurance", "Flexibility"] },
-  { id: 1, title: "Fitness Level", icon: Activity, options: ["Beginner", "Intermediate", "Advanced"] },
-  { id: 2, title: "Dietary Preference", icon: Utensils, options: ["Omnivore", "Vegetarian", "Vegan", "Keto", "Halal"] },
-  { id: 3, title: "Schedule Availability", icon: Calendar, options: ["Early Morning", "Morning", "Afternoon", "Evening", "Late Night"] },
-]
+export const dynamic = 'force-dynamic'
 
 export default function OnboardingPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const supabase = createClient()
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState({ fitnessGoal: "", fitnessLevel: "", dietaryPreference: "", schedule: "" })
+  const [saving, setSaving] = useState(false)
+  const [answers, setAnswers] = useState({
+    fitnessGoal: "",
+    fitnessLevel: "",
+    dietaryPreference: "",
+    schedule: "",
+  })
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/login")
+  }, [status])
+
+  const questions = ["Fitness Goal?", "Fitness Level?", "Dietary Preference?", "Schedule Availability?"]
+  const options = [["Weight Loss","Muscle Gain","Endurance"],["Beginner","Intermediate","Advanced"],["Omnivore","Vegetarian","Keto","Halal"],["Morning","Afternoon","Evening"]]
+
   const handleSelect = async (val: string) => {
     const key = ["fitnessGoal","fitnessLevel","dietaryPreference","schedule"][step]
     const newAnswers = { ...answers, [key]: val.toLowerCase().replace(" ", "-") }
     setAnswers(newAnswers)
     if (step === 3) {
-      await supabase.from("users").update(newAnswers).eq("id", session?.user?.id)
-      router.push("/subscription")
+      setSaving(true)
+      try {
+        const res = await fetch("/api/onboarding", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newAnswers),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          toast.error(data.error || "Could not save your answers, please try again.")
+          setSaving(false)
+          return
+        }
+        router.push("/subscription")
+      } catch {
+        toast.error("Something went wrong saving your answers.")
+        setSaving(false)
+      }
     } else {
       setStep(step + 1)
     }
   }
-  const progress = ((step + 1) / steps.length) * 100
-  const Icon = steps[step].icon
+
+  if (status === "loading") return <div className="text-center mt-20">Loading...</div>
+  if (!session) return null
+
   return (
-    <div className="min-h-screen flex items-center justify-center section-padding">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="glass-card p-8 max-w-md w-full">
-        <div className="mb-6"><div className="h-2 bg-white/10 rounded-full overflow-hidden"><motion.div className="h-full lime-gradient" initial={{ width: 0 }} animate={{ width: `${progress}%` }} /></div></div>
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-drefit-lime/10 mb-4"><Icon className="w-8 h-8 text-drefit-lime" /></div>
-          <h2 className="text-2xl">{steps[step].title}</h2>
-        </div>
-        <div className="space-y-2">
-          {steps[step].options.map(opt => (
-            <button key={opt} onClick={()=>handleSelect(opt)} className="w-full glass-card p-4 text-left hover:border-drefit-lime transition flex justify-between items-center">
-              <span>{opt}</span><ChevronRight className="w-5 h-5 text-drefit-lime opacity-0 group-hover:opacity-100" />
-            </button>
-          ))}
-        </div>
-        {step > 0 && <button onClick={()=>setStep(step-1)} className="mt-6 text-gray-400 hover:text-drefit-lime">← Go Back</button>}
+        <h2 className="text-2xl mb-4">{questions[step]}</h2>
+        {options[step].map(opt => (
+          <button key={opt} disabled={saving} onClick={() => handleSelect(opt)} className="w-full glass-card p-3 mb-2 text-left hover:border-drefit-lime disabled:opacity-50">
+            {opt}
+          </button>
+        ))}
       </div>
     </div>
   )

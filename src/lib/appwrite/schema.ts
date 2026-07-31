@@ -23,4 +23,6 @@ export interface AppwriteUserDoc {
   fitnessLevel?: FitnessLevel
   dietaryPreference?: DietaryPreference
   schedule?: Schedule
+  passwordResetTokenHash?: string
+  passwordResetExpires?: string
 }

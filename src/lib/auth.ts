@@ -1,4 +1,5 @@
 import NextAuth from "next-auth"
+import { CredentialsSignin } from "@auth/core/errors"
 import Google from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare, hash } from "bcryptjs"
@@ -8,8 +9,13 @@ import { z } from "zod"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(6) })
+
+class RateLimitedSignin extends CredentialsSignin {
+  static type = "RateLimited"
+}
 
 async function findUserByEmail(email: string): Promise<AppwriteUserDoc | undefined> {
   const result = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
@@ -43,9 +49,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     CredentialsProvider({
       name: "credentials",
       credentials: { email: {}, password: {} },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const parsed = loginSchema.safeParse(credentials)
         if (!parsed.success) return null
+
+        const ip = getClientIp(request)
+        if (!rateLimit(`login:${ip}:${parsed.data.email}`, 5, 60_000).success) {
+          throw new RateLimitedSignin()
+        }
+
         const user = await findUserByEmail(parsed.data.email)
         if (!user) return null
         const isValid = await compare(parsed.data.password, user.password)

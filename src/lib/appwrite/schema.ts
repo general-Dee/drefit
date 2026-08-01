@@ -6,6 +6,8 @@ export const PROGRESS_PHOTOS_BUCKET_ID = "progress-photos"
 export const WORKOUTS_COLLECTION_ID = "workouts"
 export const WORKOUT_COMPLETIONS_COLLECTION_ID = "workoutCompletions"
 export const DIET_PLANS_COLLECTION_ID = "dietPlans"
+export const COMMUNITY_POSTS_COLLECTION_ID = "communityPosts"
+export const COMMUNITY_COMMENTS_COLLECTION_ID = "communityComments"
 
 export type SubscriptionStatus = "trialing" | "active" | "inactive"
 
@@ -90,4 +92,24 @@ export interface DietPlanDoc {
   lunch: string
   dinner: string
   snack: string
+}
+
+// Documents in the `communityPosts` collection.
+export interface CommunityPostDoc {
+  $id: string
+  userId: string
+  userName: string
+  content: string
+  likedBy: string[]
+  createdAt: string
+}
+
+// Documents in the `communityComments` collection.
+export interface CommunityCommentDoc {
+  $id: string
+  postId: string
+  userId: string
+  userName: string
+  content: string
+  createdAt: string
 }

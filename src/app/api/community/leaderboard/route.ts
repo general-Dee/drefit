@@ -1,0 +1,51 @@
+import { NextResponse } from "next/server"
+import { Query } from "node-appwrite"
+import { auth } from "@/lib/auth"
+import { serverDatabases } from "@/lib/appwrite/server"
+import {
+  DATABASE_ID,
+  USERS_COLLECTION_ID,
+  WORKOUT_COMPLETIONS_COLLECTION_ID,
+  type AppwriteUserDoc,
+  type WorkoutCompletionDoc,
+} from "@/lib/appwrite/schema"
+
+export async function GET() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const result = await serverDatabases.listDocuments(DATABASE_ID, WORKOUT_COMPLETIONS_COLLECTION_ID, [
+    Query.greaterThanEqual("completedAt", sevenDaysAgo),
+    Query.limit(500),
+  ])
+
+  const counts = new Map<string, number>()
+  for (const doc of result.documents as unknown as WorkoutCompletionDoc[]) {
+    counts.set(doc.userId, (counts.get(doc.userId) ?? 0) + 1)
+  }
+
+  const top = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+
+  if (top.length === 0) {
+    return NextResponse.json({ leaderboard: [] })
+  }
+
+  const users = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+    Query.equal("$id", top.map(([userId]) => userId)),
+  ])
+  const namesById = new Map(
+    (users.documents as unknown as AppwriteUserDoc[]).map((u) => [u.$id, u.name])
+  )
+
+  const leaderboard = top.map(([userId, count]) => ({
+    name: namesById.get(userId) ?? "Athlete",
+    count,
+  }))
+
+  return NextResponse.json({ leaderboard })
+}

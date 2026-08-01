@@ -3,6 +3,9 @@ export const USERS_COLLECTION_ID = "users"
 export const PROGRESS_LOGS_COLLECTION_ID = "progressLogs"
 export const PROGRESS_PHOTOS_COLLECTION_ID = "progressPhotos"
 export const PROGRESS_PHOTOS_BUCKET_ID = "progress-photos"
+export const WORKOUTS_COLLECTION_ID = "workouts"
+export const WORKOUT_COMPLETIONS_COLLECTION_ID = "workoutCompletions"
+export const DIET_PLANS_COLLECTION_ID = "dietPlans"
 
 export type SubscriptionStatus = "trialing" | "active" | "inactive"
 
@@ -45,4 +48,46 @@ export interface ProgressPhotoDoc {
   userId: string
   fileId: string
   takenAt: string
+}
+
+export interface Exercise {
+  name: string
+  sets: number
+  reps: number
+  rest: number
+}
+
+// Documents in the `workouts` collection. Admin-curated content, seeded
+// directly in the Appwrite console (no admin CRUD UI yet).
+export interface WorkoutDoc {
+  $id: string
+  name: string
+  muscleGroup: string
+  duration: number
+  difficulty: FitnessLevel
+  calories: number
+  goal: FitnessGoal
+  // JSON-encoded Exercise[] — kept as a single string attribute since
+  // Appwrite collections don't support nested object arrays.
+  exercisesJson: string
+}
+
+// Documents in the `workoutCompletions` collection — one per finished workout.
+export interface WorkoutCompletionDoc {
+  $id: string
+  userId: string
+  workoutId: string
+  completedAt: string
+}
+
+// Documents in the `dietPlans` collection. Admin-curated content, one
+// document per (dietaryPreference, day) pair, seeded via the Appwrite console.
+export interface DietPlanDoc {
+  $id: string
+  dietaryPreference: DietaryPreference
+  day: string
+  breakfast: string
+  lunch: string
+  dinner: string
+  snack: string
 }

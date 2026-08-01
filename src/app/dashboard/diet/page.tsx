@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export default function DietPage() {
   const [plans, setPlans] = useState<DietPlanDoc[]>([])
-  const [day, setDay] = useState("")
+  const [selectedId, setSelectedId] = useState("")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -17,17 +17,21 @@ export default function DietPage() {
       .then((data) => {
         const list: DietPlanDoc[] = data.plans ?? []
         setPlans(list)
-        if (list.length > 0) setDay(list[0].day)
+        if (list.length > 0) setSelectedId(list[0].$id)
       })
       .finally(() => setLoading(false))
   }, [])
 
-  const meals = plans.find((p) => p.day === day)
+  const meals = plans.find((p) => p.$id === selectedId)
+  // Days are only unique within a single dietary preference. The fallback
+  // path (no preference set yet) can return multiple preferences at once,
+  // so disambiguate day labels only when that's actually happening.
+  const showPreferenceLabel = new Set(plans.map((p) => p.dietaryPreference)).size > 1
 
   const handleGenerateShoppingList = () => {
     if (!meals) return
     const items = [meals.breakfast, meals.lunch, meals.dinner, meals.snack].join(", ")
-    toast.success(`Shopping list for ${day}: ${items}`, { duration: 8000 })
+    toast.success(`Shopping list for ${meals.day}: ${items}`, { duration: 8000 })
   }
 
   return (
@@ -44,10 +48,11 @@ export default function DietPage() {
             {plans.map((p) => (
               <button
                 key={p.$id}
-                onClick={() => setDay(p.day)}
-                className={`px-4 py-2 rounded-lg ${day === p.day ? "bg-drefit-lime text-drefit-dark" : "bg-white/5"}`}
+                onClick={() => setSelectedId(p.$id)}
+                className={`px-4 py-2 rounded-lg ${selectedId === p.$id ? "bg-drefit-lime text-drefit-dark" : "bg-white/5"}`}
               >
                 {p.day}
+                {showPreferenceLabel ? ` (${p.dietaryPreference})` : ""}
               </button>
             ))}
           </div>

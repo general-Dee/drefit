@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { hasActiveAccess } from "@/lib/subscription"
+import DashboardNav from "@/components/DashboardNav"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -10,5 +11,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/subscription")
   }
 
-  return <>{children}</>
+  return (
+    <>
+      <DashboardNav role={session.user.role} />
+      {children}
+    </>
+  )
 }

@@ -1,4 +1,4 @@
-﻿import { Client, Databases } from "node-appwrite";
+﻿import { Client, Databases, Storage } from "node-appwrite";
 
 const client = new Client();
 
@@ -8,3 +8,4 @@ client
   .setKey(process.env.APPWRITE_API_KEY!);
 
 export const serverDatabases = new Databases(client);
+export const serverStorage = new Storage(client);

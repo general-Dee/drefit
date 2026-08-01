@@ -1,5 +1,8 @@
 export const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!
 export const USERS_COLLECTION_ID = "users"
+export const PROGRESS_LOGS_COLLECTION_ID = "progressLogs"
+export const PROGRESS_PHOTOS_COLLECTION_ID = "progressPhotos"
+export const PROGRESS_PHOTOS_BUCKET_ID = "progress-photos"
 
 export type SubscriptionStatus = "trialing" | "active" | "inactive"
 
@@ -25,4 +28,21 @@ export interface AppwriteUserDoc {
   schedule?: Schedule
   passwordResetTokenHash?: string
   passwordResetExpires?: string
+  notificationsEnabled?: boolean
+}
+
+// Documents in the `progressLogs` collection.
+export interface ProgressLogDoc {
+  $id: string
+  userId: string
+  weight: number
+  loggedAt: string
+}
+
+// Documents in the `progressPhotos` collection.
+export interface ProgressPhotoDoc {
+  $id: string
+  userId: string
+  fileId: string
+  takenAt: string
 }

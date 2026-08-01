@@ -2,10 +2,16 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Search, Clock, Flame } from "lucide-react"
+import { Search, Clock, Flame, ChevronRight } from "lucide-react"
 import type { WorkoutDoc } from "@/lib/appwrite/schema"
 
 export const dynamic = "force-dynamic"
+
+const difficultyStyles: Record<string, string> = {
+  beginner: "bg-drefit-lime/20 text-drefit-lime",
+  intermediate: "bg-white/10 text-white",
+  advanced: "bg-red-500/20 text-red-400",
+}
 
 export default function WorkoutsPage() {
   const [search, setSearch] = useState("")
@@ -36,23 +42,43 @@ export default function WorkoutsPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-400">Loading...</p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="glass-card p-5 h-32 animate-pulse" />
+          ))}
+        </div>
       ) : filtered.length === 0 ? (
-        <p className="text-gray-400">No workouts found.</p>
+        <p className="text-gray-400 text-center py-12">No workouts found.</p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((w) => (
-            <motion.div key={w.$id} className="glass-card p-4">
-              <h3 className="text-xl">{w.name}</h3>
-              <div className="flex gap-2 text-sm text-gray-400 mt-2">
-                <Clock className="w-4 h-4" />
-                {w.duration} mins <Flame className="w-4 h-4 ml-2" />
-                {w.calories} cal
-              </div>
-              <Link href={`/dashboard/workouts/${w.$id}`} className="inline-block mt-3 text-drefit-lime">
-                View →
-              </Link>
-            </motion.div>
+            <Link key={w.$id} href={`/dashboard/workouts/${w.$id}`} className="group">
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="glass-card p-5 h-full flex flex-col justify-between hover:border-drefit-lime/40 transition-colors cursor-pointer"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-xl leading-tight">{w.name}</h3>
+                    <span className={`shrink-0 text-xs px-2 py-1 rounded-full ${difficultyStyles[w.difficulty] ?? "bg-white/10 text-white"}`}>
+                      {w.difficulty}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-400 mt-1">{w.muscleGroup}</p>
+                </div>
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                  <div className="flex gap-3 text-sm text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" /> {w.duration}m
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Flame className="w-4 h-4" /> {w.calories}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-drefit-lime group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.div>
+            </Link>
           ))}
         </div>
       )}

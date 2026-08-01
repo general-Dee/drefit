@@ -10,6 +10,12 @@ import type { Exercise, WorkoutDoc } from "@/lib/appwrite/schema"
 
 export const dynamic = "force-dynamic"
 
+const difficultyStyles: Record<string, string> = {
+  beginner: "bg-drefit-lime/20 text-drefit-lime",
+  intermediate: "bg-white/10 text-white",
+  advanced: "bg-red-500/20 text-red-400",
+}
+
 export default function WorkoutDetail({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [workout, setWorkout] = useState<WorkoutDoc | null>(null)
@@ -62,16 +68,36 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
       <h1 className="text-3xl mb-2">{workout.name}</h1>
-      <div className="flex gap-2 text-sm text-gray-400 mb-1">
-        <Clock className="w-4 h-4" />
-        {workout.duration} mins <Flame className="w-4 h-4 ml-2" />
-        {workout.calories} cal
+      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400 mb-1">
+        <span className="flex items-center gap-1">
+          <Clock className="w-4 h-4" /> {workout.duration} mins
+        </span>
+        <span className="flex items-center gap-1">
+          <Flame className="w-4 h-4" /> {workout.calories} cal
+        </span>
+        <span className={`px-2 py-0.5 rounded-full text-xs ${difficultyStyles[workout.difficulty] ?? "bg-white/10 text-white"}`}>
+          {workout.difficulty}
+        </span>
+        <span className="px-2 py-0.5 rounded-full text-xs bg-white/10">{workout.muscleGroup}</span>
       </div>
       {completionCount > 0 && lastCompletedAt && (
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm text-gray-400 mb-2">
           Completed {completionCount}× — last on {format(new Date(lastCompletedAt), "MMM d, yyyy")}
         </p>
       )}
+
+      <div className="w-full h-1.5 bg-white/10 rounded-full mt-4 overflow-hidden">
+        <motion.div
+          className="h-full bg-drefit-lime"
+          initial={false}
+          animate={{ width: `${(completed.length / exercises.length) * 100}%` }}
+          transition={{ ease: "easeOut" }}
+        />
+      </div>
+      <p className="text-xs text-gray-400 mt-1 mb-4">
+        {completed.length} of {exercises.length} exercises done
+      </p>
+
       <div className="space-y-3 mt-4">
         {exercises.map((ex, i) => (
           <motion.div

@@ -59,8 +59,8 @@ export interface Exercise {
   rest: number
 }
 
-// Documents in the `workouts` collection. Admin-curated content, seeded
-// directly in the Appwrite console (no admin CRUD UI yet).
+// Documents in the `workouts` collection. Admin-curated content, managed via
+// /admin/workouts (also seedable in bulk via scripts/seed-appwrite.mjs).
 export interface WorkoutDoc {
   $id: string
   name: string
@@ -83,7 +83,8 @@ export interface WorkoutCompletionDoc {
 }
 
 // Documents in the `dietPlans` collection. Admin-curated content, one
-// document per (dietaryPreference, day) pair, seeded via the Appwrite console.
+// document per (dietaryPreference, day) pair, managed via /admin/diet
+// (also seedable in bulk via scripts/seed-appwrite.mjs).
 export interface DietPlanDoc {
   $id: string
   dietaryPreference: DietaryPreference

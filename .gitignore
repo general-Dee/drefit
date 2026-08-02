@@ -34,3 +34,6 @@ next-env.d.ts
 # IDE
 .vscode/
 .idea/
+
+# Local-only QA scripts
+scripts/_qa-make-test-admin.mjs

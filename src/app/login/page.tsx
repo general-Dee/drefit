@@ -1,5 +1,5 @@
 "use client"
-import { signIn } from "next-auth/react"
+import { signIn, getSession } from "next-auth/react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -17,13 +17,14 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const result = await signIn("credentials", { email, password, redirect: false })
-      if (result?.error) {
-        toast.error(
-          result.error === "RateLimited"
-            ? "Too many attempts. Please try again in a minute."
-            : "Invalid email or password."
-        )
+      // next-auth's client signIn() throws internally when called with
+      // redirect: false for the credentials provider (it builds a URL from
+      // a relative base). Swallow that and verify the outcome via the
+      // session instead of trusting signIn()'s return value.
+      await signIn("credentials", { email, password, redirect: false }).catch(() => {})
+      const session = await getSession()
+      if (!session) {
+        toast.error("Invalid email or password.")
         return
       }
       router.push("/dashboard")

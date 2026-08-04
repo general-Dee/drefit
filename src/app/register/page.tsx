@@ -1,7 +1,7 @@
 ﻿"use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { signIn, getSession } from "next-auth/react"
 import toast from "react-hot-toast"
 
 export const dynamic = 'force-dynamic'
@@ -28,8 +28,13 @@ export default function RegisterPage() {
         return
       }
 
-      const result = await signIn("credentials", { email, password, redirect: false })
-      if (result?.error) {
+      // next-auth's client signIn() throws internally when called with
+      // redirect: false for the credentials provider (it builds a URL from
+      // a relative base). Swallow that and verify the outcome via the
+      // session instead of trusting signIn()'s return value.
+      await signIn("credentials", { email, password, redirect: false }).catch(() => {})
+      const session = await getSession()
+      if (!session) {
         toast.error("Account created, but sign-in failed. Please try logging in.")
         router.push("/login")
         return

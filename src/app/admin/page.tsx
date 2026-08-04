@@ -50,6 +50,16 @@ export default async function AdminPage() {
           </div>
           <ChevronRight className="text-drefit-lime" />
         </Link>
+        <Link
+          href="/admin/coaching"
+          className="glass-card p-4 flex items-center justify-between hover:border-drefit-lime/40 transition-colors"
+        >
+          <div>
+            <h2 className="text-xl mb-1">Coaching Messages</h2>
+            <p className="text-sm text-gray-400">Reply to member conversations</p>
+          </div>
+          <ChevronRight className="text-drefit-lime" />
+        </Link>
       </div>
     </div>
   )

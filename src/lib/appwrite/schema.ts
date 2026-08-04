@@ -8,6 +8,7 @@ export const WORKOUT_COMPLETIONS_COLLECTION_ID = "workoutCompletions"
 export const DIET_PLANS_COLLECTION_ID = "dietPlans"
 export const COMMUNITY_POSTS_COLLECTION_ID = "communityPosts"
 export const COMMUNITY_COMMENTS_COLLECTION_ID = "communityComments"
+export const COACHING_MESSAGES_COLLECTION_ID = "coachingMessages"
 
 export type SubscriptionStatus = "trialing" | "active" | "inactive"
 
@@ -111,6 +112,19 @@ export interface CommunityCommentDoc {
   postId: string
   userId: string
   userName: string
+  content: string
+  createdAt: string
+}
+
+// Documents in the `coachingMessages` collection. Each member has exactly one
+// implicit thread with "the coaching team" (any admin) — `userId` is always
+// the member the thread belongs to, regardless of who sent a given message.
+export interface CoachingMessageDoc {
+  $id: string
+  userId: string
+  senderId: string
+  senderName: string
+  isFromAdmin: boolean
   content: string
   createdAt: string
 }

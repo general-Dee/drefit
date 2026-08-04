@@ -212,6 +212,18 @@ async function main() {
   await waitForAttributes("communityComments", ["postId", "userId", "userName", "content", "createdAt"])
   await ensureIndex("communityComments", "postId_createdAt", ["postId", "createdAt"], [OrderBy.Asc, OrderBy.Asc])
 
+  // --- coachingMessages ---
+  await ensureCollection("coachingMessages", "Coaching Messages")
+  await ensureStringAttr("coachingMessages", "userId", 255, true)
+  await ensureStringAttr("coachingMessages", "senderId", 255, true)
+  await ensureStringAttr("coachingMessages", "senderName", 255, true)
+  await ensureBooleanAttr("coachingMessages", "isFromAdmin", true)
+  await ensureStringAttr("coachingMessages", "content", 2000, true)
+  await ensureDatetimeAttr("coachingMessages", "createdAt", true)
+  await waitForAttributes("coachingMessages", ["userId", "senderId", "senderName", "isFromAdmin", "content", "createdAt"])
+  await ensureIndex("coachingMessages", "userId_createdAt", ["userId", "createdAt"], [OrderBy.Asc, OrderBy.Asc])
+  await ensureIndex("coachingMessages", "createdAt_idx", ["createdAt"], [OrderBy.Desc])
+
   // --- progress-photos bucket ---
   await ensureBucket("progress-photos", "Progress Photos")
 

@@ -58,7 +58,7 @@ export default function LoginPage() {
         <button onClick={()=>signIn("google",{callbackUrl:"/dashboard"})} className="w-full border border-white/20 rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-white/5">
           <span className="text-lg">G</span> Continue with Google
         </button>
-        <p className="text-center mt-6 text-gray-400">Don't have an account? <Link href="/register" className="text-drefit-lime">Sign up</Link></p>
+        <p className="text-center mt-6 text-gray-400">Don&apos;t have an account? <Link href="/register" className="text-drefit-lime">Sign up</Link></p>
       </motion.div>
     </div>
   )

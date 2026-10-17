@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { ID, Query } from "node-appwrite"
-import { auth } from "@/lib/auth"
+import { requireMember } from "@/lib/member-guard"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, COACHING_MESSAGES_COLLECTION_ID } from "@/lib/appwrite/schema"
 
@@ -10,10 +10,9 @@ const messageSchema = z.object({
 })
 
 export async function GET() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const result = await serverDatabases.listDocuments(DATABASE_ID, COACHING_MESSAGES_COLLECTION_ID, [
     Query.equal("userId", session.user.id),
@@ -25,10 +24,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const body = await req.json().catch(() => null)
   const parsed = messageSchema.safeParse(body)

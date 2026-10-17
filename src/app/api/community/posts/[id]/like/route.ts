@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
+import { requireMember } from "@/lib/member-guard"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, type CommunityPostDoc } from "@/lib/appwrite/schema"
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const post = (await serverDatabases
     .getDocument(DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, params.id)

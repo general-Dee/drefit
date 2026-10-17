@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ID, Permission, Query, Role } from "node-appwrite"
 import { InputFile } from "node-appwrite/file"
-import { auth } from "@/lib/auth"
+import { requireMember } from "@/lib/member-guard"
 import { serverDatabases, serverStorage } from "@/lib/appwrite/server"
 import { DATABASE_ID, PROGRESS_PHOTOS_BUCKET_ID, PROGRESS_PHOTOS_COLLECTION_ID } from "@/lib/appwrite/schema"
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const formData = await req.formData().catch(() => null)
   const file = formData?.get("file")
@@ -54,10 +53,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const result = await serverDatabases.listDocuments(DATABASE_ID, PROGRESS_PHOTOS_COLLECTION_ID, [
     Query.equal("userId", session.user.id),

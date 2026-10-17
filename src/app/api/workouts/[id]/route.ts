@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Query } from "node-appwrite"
-import { auth } from "@/lib/auth"
+import { requireMember } from "@/lib/member-guard"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, WORKOUTS_COLLECTION_ID, WORKOUT_COMPLETIONS_COLLECTION_ID } from "@/lib/appwrite/schema"
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const workout = await serverDatabases
     .getDocument(DATABASE_ID, WORKOUTS_COLLECTION_ID, params.id)

@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server"
 import { Query, type Models } from "node-appwrite"
-import { auth } from "@/lib/auth"
+import { requireMember } from "@/lib/member-guard"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, DIET_PLANS_COLLECTION_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
 
 export async function GET() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const user = (await serverDatabases.getDocument(
     DATABASE_ID,

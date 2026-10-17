@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Query } from "node-appwrite"
-import { auth } from "@/lib/auth"
+import { requireMember } from "@/lib/member-guard"
 import { serverDatabases, serverStorage } from "@/lib/appwrite/server"
 import { DATABASE_ID, PROGRESS_PHOTOS_BUCKET_ID, PROGRESS_PHOTOS_COLLECTION_ID } from "@/lib/appwrite/schema"
 
 export async function GET(req: NextRequest, { params }: { params: { fileId: string } }) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const gate = await requireMember()
+  if (gate.error) return gate.error
+  const session = gate.session
 
   const owned = await serverDatabases.listDocuments(DATABASE_ID, PROGRESS_PHOTOS_COLLECTION_ID, [
     Query.equal("fileId", params.fileId),

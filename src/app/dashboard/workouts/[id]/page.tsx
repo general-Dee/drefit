@@ -48,7 +48,7 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
     setCompleted(next)
     toast.success(`${name} completed!`)
     if (next.length === exercises.length) {
-      confetti({ particleCount: 150, spread: 70, colors: ["#C8F135", "#0D0DDD"] })
+      confetti({ particleCount: 150, spread: 70, colors: ["#C8F135", "#F5F5F4"], disableForReducedMotion: true })
       toast.success("🎉 Workout complete!")
       const entry = { clientId: newClientId(), workoutId: params.id, completedAt: new Date().toISOString() }
       try {
@@ -71,17 +71,17 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
   }
 
   if (loading) {
-    return <div className="p-6 max-w-2xl mx-auto text-gray-400">Loading...</div>
+    return <div className="page-shell max-w-2xl text-ink-muted">Loading...</div>
   }
   if (!workout) return null
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="page-shell max-w-2xl">
       <button onClick={() => router.back()} className="flex items-center gap-2 text-drefit-lime mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
-      <h1 className="text-3xl mb-2">{workout.name}</h1>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400 mb-1">
+      <h1 className="fade-up font-bold mb-2">{workout.name}</h1>
+      <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted mb-1">
         <span className="flex items-center gap-1">
           <Clock className="w-4 h-4" /> {workout.duration} mins
         </span>
@@ -94,7 +94,7 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
         <span className="px-2 py-0.5 rounded-full text-xs bg-white/10">{workout.muscleGroup}</span>
       </div>
       {completionCount > 0 && lastCompletedAt && (
-        <p className="text-sm text-gray-400 mb-2">
+        <p className="text-sm text-ink-muted mb-2">
           Completed {completionCount}× — last on {format(new Date(lastCompletedAt), "MMM d, yyyy")}
         </p>
       )}
@@ -107,7 +107,7 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
           transition={{ ease: "easeOut" }}
         />
       </div>
-      <p className="text-xs text-gray-400 mt-1 mb-4">
+      <p className="text-xs text-ink-muted mt-1 mb-4">
         {completed.length} of {exercises.length} exercises done
       </p>
 
@@ -122,14 +122,14 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
           >
             <div>
               <h3 className="font-bold">{ex.name}</h3>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-ink-muted">
                 {ex.sets} sets x {ex.reps} reps • {ex.rest}s rest
               </p>
             </div>
             {completed.includes(ex.name) ? (
               <CheckCircle className="text-drefit-lime w-6 h-6" />
             ) : (
-              <button onClick={() => markComplete(ex.name)} className="px-4 py-1 bg-drefit-lime text-drefit-dark rounded-lg">
+              <button onClick={() => markComplete(ex.name)} className="btn-primary px-4 py-1.5">
                 Done
               </button>
             )}

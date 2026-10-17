@@ -56,51 +56,51 @@ export default function WorkoutForm({ initialWorkout }: { initialWorkout?: Worko
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2"
+          className="input-field"
         />
         <input
           placeholder="Muscle group"
           value={muscleGroup}
           onChange={(e) => setMuscleGroup(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2"
+          className="input-field"
         />
         <div className="grid grid-cols-2 gap-3">
-          <label className="text-sm text-gray-400">
+          <label className="text-sm text-ink-muted">
             Duration (mins)
             <input
               type="number"
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+              className="input-field mt-1"
             />
           </label>
-          <label className="text-sm text-gray-400">
+          <label className="text-sm text-ink-muted">
             Calories
             <input
               type="number"
               value={calories}
               onChange={(e) => setCalories(Number(e.target.value))}
-              className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+              className="input-field mt-1"
             />
           </label>
-          <label className="text-sm text-gray-400">
+          <label className="text-sm text-ink-muted">
             Difficulty
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
-              className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+              className="input-field mt-1"
             >
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
             </select>
           </label>
-          <label className="text-sm text-gray-400">
+          <label className="text-sm text-ink-muted">
             Goal
             <select
               value={goal}
               onChange={(e) => setGoal(e.target.value as typeof goal)}
-              className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+              className="input-field mt-1"
             >
               <option value="weight-loss">Weight loss</option>
               <option value="muscle-gain">Muscle gain</option>
@@ -113,7 +113,7 @@ export default function WorkoutForm({ initialWorkout }: { initialWorkout?: Worko
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xl">Exercises</h2>
-          <span className={`text-xs ${exercisesJsonLength > 5000 ? "text-red-400" : "text-gray-400"}`}>
+          <span className={`text-xs ${exercisesJsonLength > 5000 ? "text-red-400" : "text-ink-muted"}`}>
             {exercisesJsonLength} / 5000
           </span>
         </div>
@@ -123,28 +123,28 @@ export default function WorkoutForm({ initialWorkout }: { initialWorkout?: Worko
               placeholder="Exercise name"
               value={ex.name}
               onChange={(e) => updateExercise(i, { name: e.target.value })}
-              className="bg-white/5 border border-white/10 rounded p-2"
+              className="input-field"
             />
             <input
               type="number"
               placeholder="Sets"
               value={ex.sets}
               onChange={(e) => updateExercise(i, { sets: Number(e.target.value) })}
-              className="w-16 bg-white/5 border border-white/10 rounded p-2"
+              className="input-field w-16 px-2 text-center"
             />
             <input
               type="number"
               placeholder="Reps"
               value={ex.reps}
               onChange={(e) => updateExercise(i, { reps: Number(e.target.value) })}
-              className="w-16 bg-white/5 border border-white/10 rounded p-2"
+              className="input-field w-16 px-2 text-center"
             />
             <input
               type="number"
               placeholder="Rest (s)"
               value={ex.rest}
               onChange={(e) => updateExercise(i, { rest: Number(e.target.value) })}
-              className="w-16 bg-white/5 border border-white/10 rounded p-2"
+              className="input-field w-16 px-2 text-center"
             />
             <button
               onClick={() => removeExercise(i)}
@@ -163,7 +163,7 @@ export default function WorkoutForm({ initialWorkout }: { initialWorkout?: Worko
       <button
         onClick={handleSubmit}
         disabled={saving}
-        className="bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+        className="btn-primary"
       >
         {saving ? "Saving..." : isEditing ? "Save Changes" : "Create Workout"}
       </button>

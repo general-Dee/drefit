@@ -35,13 +35,13 @@ export default function DietPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl">Diet Plans</h1>
+    <div className="page-shell space-y-6">
+      <h1 className="fade-up font-bold">Diet Plans</h1>
 
       {loading ? (
-        <p className="text-gray-400">Loading...</p>
+        <p className="text-ink-muted">Loading...</p>
       ) : plans.length === 0 ? (
-        <p className="text-gray-400">No diet plans available yet.</p>
+        <p className="text-ink-muted">No diet plans available yet.</p>
       ) : (
         <>
           <div className="flex gap-2 flex-wrap">
@@ -49,7 +49,7 @@ export default function DietPage() {
               <button
                 key={p.$id}
                 onClick={() => setSelectedId(p.$id)}
-                className={`px-4 py-2 rounded-lg ${selectedId === p.$id ? "bg-drefit-lime text-drefit-dark" : "bg-white/5"}`}
+                className={`px-4 py-2 rounded-lg ${selectedId === p.$id ? "bg-accent text-accent-ink font-semibold" : "bg-white/[0.05] text-ink-muted hover:text-ink"}`}
               >
                 {p.day}
                 {showPreferenceLabel ? ` (${p.dietaryPreference})` : ""}

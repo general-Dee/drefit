@@ -27,13 +27,13 @@ export default function EditDietPlanPage({ params }: { params: { id: string } })
   }, [params.id, router])
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
-      <Link href="/admin/diet" className="flex items-center gap-2 text-drefit-lime">
+    <div className="page-shell max-w-2xl space-y-6">
+      <Link href="/admin/diet" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
         <ArrowLeft className="w-4 h-4" /> Back to Diet Plans
       </Link>
-      <h1 className="text-3xl">Edit Diet Plan</h1>
+      <h1 className="fade-up font-bold">Edit Diet Plan</h1>
       {loading ? (
-        <div className="glass-card p-4 h-48 animate-pulse" />
+        <div className="skeleton p-4 h-48" />
       ) : plan ? (
         <DietPlanForm initialPlan={plan} />
       ) : null}

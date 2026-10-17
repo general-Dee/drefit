@@ -22,41 +22,41 @@ export default async function AdminPage() {
   const mrr = activeSubscribers.total * PLAN_PRICE_NGN
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl">Admin Dashboard</h1>
+    <div className="page-shell space-y-6">
+      <h1 className="fade-up font-bold">Admin Dashboard</h1>
       <div className="grid md:grid-cols-3 gap-4">
-        <div className="glass-card p-4"><Users className="text-drefit-lime"/> Total Users: {totalUsers.total.toLocaleString()}</div>
-        <div className="glass-card p-4"><DollarSign className="text-drefit-lime"/> MRR: ₦{mrr.toLocaleString()}</div>
-        <div className="glass-card p-4"><Dumbbell className="text-drefit-lime"/> Workouts in library: {totalWorkouts.total.toLocaleString()}</div>
+        <div className="glass-card p-4"><div className="flex items-center gap-2 text-xs font-medium text-ink-muted"><span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><Users className="h-4 w-4"/></span>Total users</div><div className="stat-value mt-3">{totalUsers.total.toLocaleString()}</div></div>
+        <div className="glass-card p-4"><div className="flex items-center gap-2 text-xs font-medium text-ink-muted"><span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><DollarSign className="h-4 w-4"/></span>MRR</div><div className="stat-value mt-3">₦{mrr.toLocaleString()}</div></div>
+        <div className="glass-card p-4"><div className="flex items-center gap-2 text-xs font-medium text-ink-muted"><span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><Dumbbell className="h-4 w-4"/></span>Workouts in library</div><div className="stat-value mt-3">{totalWorkouts.total.toLocaleString()}</div></div>
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         <Link
           href="/admin/workouts"
-          className="glass-card p-4 flex items-center justify-between hover:border-drefit-lime/40 transition-colors"
+          className="glass-card card-interactive p-4 flex items-center justify-between"
         >
           <div>
             <h2 className="text-xl mb-1">Manage Workouts</h2>
-            <p className="text-sm text-gray-400">{totalWorkouts.total.toLocaleString()} in library</p>
+            <p className="text-sm text-ink-muted">{totalWorkouts.total.toLocaleString()} in library</p>
           </div>
           <ChevronRight className="text-drefit-lime" />
         </Link>
         <Link
           href="/admin/diet"
-          className="glass-card p-4 flex items-center justify-between hover:border-drefit-lime/40 transition-colors"
+          className="glass-card card-interactive p-4 flex items-center justify-between"
         >
           <div>
             <h2 className="text-xl mb-1">Manage Diet Plans</h2>
-            <p className="text-sm text-gray-400">{totalDietPlans.total.toLocaleString()} plan days</p>
+            <p className="text-sm text-ink-muted">{totalDietPlans.total.toLocaleString()} plan days</p>
           </div>
           <ChevronRight className="text-drefit-lime" />
         </Link>
         <Link
           href="/admin/coaching"
-          className="glass-card p-4 flex items-center justify-between hover:border-drefit-lime/40 transition-colors"
+          className="glass-card card-interactive p-4 flex items-center justify-between"
         >
           <div>
             <h2 className="text-xl mb-1">Coaching Messages</h2>
-            <p className="text-sm text-gray-400">Reply to member conversations</p>
+            <p className="text-sm text-ink-muted">Reply to member conversations</p>
           </div>
           <ChevronRight className="text-drefit-lime" />
         </Link>

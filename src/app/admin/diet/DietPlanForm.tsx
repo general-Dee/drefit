@@ -39,12 +39,12 @@ export default function DietPlanForm({ initialPlan }: { initialPlan?: DietPlanDo
   return (
     <div className="glass-card p-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <label className="text-sm text-gray-400">
+        <label className="text-sm text-ink-muted">
           Dietary preference
           <select
             value={dietaryPreference}
             onChange={(e) => setDietaryPreference(e.target.value as typeof dietaryPreference)}
-            className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+            className="input-field mt-1"
           >
             <option value="omnivore">Omnivore</option>
             <option value="vegetarian">Vegetarian</option>
@@ -52,56 +52,56 @@ export default function DietPlanForm({ initialPlan }: { initialPlan?: DietPlanDo
             <option value="halal">Halal</option>
           </select>
         </label>
-        <label className="text-sm text-gray-400">
+        <label className="text-sm text-ink-muted">
           Day
           <input
             placeholder="e.g. Monday"
             value={day}
             onChange={(e) => setDay(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+            className="input-field mt-1"
           />
         </label>
       </div>
-      <label className="block text-sm text-gray-400">
+      <label className="block text-sm text-ink-muted">
         Breakfast
         <textarea
           value={breakfast}
           onChange={(e) => setBreakfast(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+          className="input-field mt-1"
           rows={2}
         />
       </label>
-      <label className="block text-sm text-gray-400">
+      <label className="block text-sm text-ink-muted">
         Lunch
         <textarea
           value={lunch}
           onChange={(e) => setLunch(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+          className="input-field mt-1"
           rows={2}
         />
       </label>
-      <label className="block text-sm text-gray-400">
+      <label className="block text-sm text-ink-muted">
         Dinner
         <textarea
           value={dinner}
           onChange={(e) => setDinner(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+          className="input-field mt-1"
           rows={2}
         />
       </label>
-      <label className="block text-sm text-gray-400">
+      <label className="block text-sm text-ink-muted">
         Snack
         <textarea
           value={snack}
           onChange={(e) => setSnack(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2 mt-1"
+          className="input-field mt-1"
           rows={2}
         />
       </label>
       <button
         onClick={handleSubmit}
         disabled={saving}
-        className="bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+        className="btn-primary"
       >
         {saving ? "Saving..." : isEditing ? "Save Changes" : "Create Diet Plan"}
       </button>

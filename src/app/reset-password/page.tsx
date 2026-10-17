@@ -1,9 +1,9 @@
 "use client"
 import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { motion } from "framer-motion"
 import { Lock } from "lucide-react"
 import toast from "react-hot-toast"
+import Logo from "@/components/ui/Logo"
 
 export const dynamic = 'force-dynamic'
 
@@ -50,34 +50,38 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center section-padding">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 w-full max-w-md text-center">
-          <h1 className="text-3xl mb-2">Invalid Link</h1>
-          <p className="text-gray-400">This password reset link is missing or invalid. Please request a new one.</p>
-        </motion.div>
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
+      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
+      <Logo className="relative mb-8" />
+        <div className="glass-card fade-up relative p-6 sm:p-8 w-full max-w-md text-center">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2">Invalid Link</h1>
+          <p className="text-ink-muted">This password reset link is missing or invalid. Please request a new one.</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center section-padding">
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 w-full max-w-md">
-        <h1 className="text-3xl mb-2 text-center">Reset Password</h1>
-        <p className="text-gray-400 text-center mb-6">Enter a new password for your account.</p>
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
+      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
+      <Logo className="relative mb-8" />
+      <div className="glass-card fade-up relative p-6 sm:p-8 w-full max-w-md">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2 text-center">Reset Password</h1>
+        <p className="text-ink-muted text-center mb-6">Enter a new password for your account.</p>
         <form onSubmit={handleSubmit}>
           <div className="relative mb-4">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input type="password" placeholder="New Password" className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 focus:border-drefit-lime outline-none" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} />
+            <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle w-5 h-5" />
+            <input type="password" placeholder="New Password" className="input-field pl-10" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} />
           </div>
           <div className="relative mb-6">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input type="password" placeholder="Confirm Password" className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-10 pr-4 focus:border-drefit-lime outline-none" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required minLength={6} />
+            <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle w-5 h-5" />
+            <input type="password" placeholder="Confirm Password" className="input-field pl-10" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required minLength={6} />
           </div>
-          <button type="submit" disabled={loading} className="w-full lime-gradient text-drefit-dark font-bold py-3 rounded-lg hover:scale-105 transition disabled:opacity-50">
+          <button type="submit" disabled={loading} className="btn-primary w-full py-3">
             {loading ? "Resetting..." : "Reset Password"}
           </button>
         </form>
-      </motion.div>
+      </div>
     </div>
   )
 }

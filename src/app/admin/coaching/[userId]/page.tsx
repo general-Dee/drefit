@@ -46,27 +46,27 @@ export default function AdminCoachingThreadPage({ params }: { params: { userId: 
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl mx-auto">
-      <Link href="/admin/coaching" className="flex items-center gap-2 text-drefit-lime">
+    <div className="page-shell max-w-3xl space-y-6">
+      <Link href="/admin/coaching" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
         <ArrowLeft className="w-4 h-4" /> Back to Inbox
       </Link>
-      <h1 className="text-3xl">{memberName}</h1>
+      <h1 className="fade-up font-bold">{memberName}</h1>
 
       <div className="glass-card p-4 space-y-3 min-h-[300px]">
         {loading ? (
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-12 rounded bg-white/5 animate-pulse" />
+              <div key={i} className="skeleton h-12" />
             ))}
           </div>
         ) : messages.length === 0 ? (
-          <p className="text-gray-400 text-center py-12">No messages yet.</p>
+          <p className="text-ink-muted text-center py-12">No messages yet.</p>
         ) : (
           messages.map((m) => (
             <div key={m.$id} className={`flex ${m.isFromAdmin ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${
-                  m.isFromAdmin ? "bg-drefit-lime text-drefit-dark" : "bg-white/5 text-gray-200"
+                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                  m.isFromAdmin ? "bg-accent text-accent-ink rounded-br-md" : "bg-white/[0.06] text-ink rounded-bl-md"
                 }`}
               >
                 <div className="text-xs opacity-70 mb-1">{m.isFromAdmin ? "You" : m.senderName}</div>
@@ -81,7 +81,7 @@ export default function AdminCoachingThreadPage({ params }: { params: { userId: 
         <input
           type="text"
           placeholder="Reply..."
-          className="flex-1 bg-white/5 border border-white/10 rounded p-3"
+          className="input-field flex-1"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
@@ -89,7 +89,7 @@ export default function AdminCoachingThreadPage({ params }: { params: { userId: 
         <button
           onClick={handleSend}
           disabled={sending || !content.trim()}
-          className="flex items-center gap-1 bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+          className="btn-primary px-4"
         >
           <Send className="w-4 h-4" /> {sending ? "Sending..." : "Send"}
         </button>

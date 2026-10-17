@@ -44,13 +44,13 @@ export default function AdminDietPage() {
   }, {})
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
-      <Link href="/admin" className="flex items-center gap-2 text-drefit-lime">
+    <div className="page-shell max-w-4xl space-y-6">
+      <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
         <ArrowLeft className="w-4 h-4" /> Back to Admin
       </Link>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl">Manage Diet Plans</h1>
-        <Link href="/admin/diet/new" className="flex items-center gap-1 bg-drefit-lime text-drefit-dark px-4 py-2 rounded">
+        <h1 className="fade-up font-bold">Manage Diet Plans</h1>
+        <Link href="/admin/diet/new" className="btn-primary px-4 py-2.5">
           <Plus className="w-4 h-4" /> New Plan
         </Link>
       </div>
@@ -58,11 +58,11 @@ export default function AdminDietPage() {
       {loading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="glass-card p-4 h-16 animate-pulse" />
+            <div key={i} className="skeleton h-16" />
           ))}
         </div>
       ) : plans.length === 0 ? (
-        <p className="text-gray-400 text-center py-12">No diet plans yet.</p>
+        <p className="text-ink-muted text-center py-12">No diet plans yet.</p>
       ) : (
         Object.entries(grouped).map(([preference, preferencePlans]) => (
           <div key={preference} className="space-y-3">
@@ -71,7 +71,7 @@ export default function AdminDietPage() {
               <div key={p.$id} className="glass-card p-4 flex items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold">{p.day}</h3>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-ink-muted mt-1">
                     {p.breakfast} • {p.lunch} • {p.dinner} • {p.snack}
                   </p>
                 </div>
@@ -81,15 +81,15 @@ export default function AdminDietPage() {
                   </Link>
                   {confirmingDeleteId === p.$id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400">Sure?</span>
+                      <span className="text-sm text-ink-muted">Sure?</span>
                       <button
                         onClick={() => handleDelete(p.$id)}
                         disabled={deletingId === p.$id}
-                        className="text-red-400 font-medium disabled:opacity-50"
+                        className="btn-danger"
                       >
                         {deletingId === p.$id ? "Deleting..." : "Yes, delete"}
                       </button>
-                      <button onClick={() => setConfirmingDeleteId(null)} className="text-gray-400">
+                      <button onClick={() => setConfirmingDeleteId(null)} className="text-ink-muted">
                         Never mind
                       </button>
                     </div>

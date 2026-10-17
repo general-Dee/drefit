@@ -11,9 +11,9 @@ export default function CoachWhatsAppButton({ className = "" }: { className?: st
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 font-semibold text-black hover:opacity-90 ${className}`}
+      className={`btn-secondary px-4 py-2.5 ${className}`}
     >
-      <MessageCircle className="w-4 h-4" /> Chat with your coach
+      <MessageCircle className="h-4 w-4 text-[#25D366]" aria-hidden /> Chat with your coach
     </a>
   )
 }

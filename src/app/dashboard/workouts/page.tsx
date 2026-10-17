@@ -28,14 +28,14 @@ export default function WorkoutsPage() {
   const filtered = workouts.filter((w) => w.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl">Workout Plans</h1>
+    <div className="page-shell space-y-6">
+      <h1 className="fade-up font-bold">Workout Plans</h1>
       <div className="relative">
-        <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle w-5 h-5" />
         <input
           type="text"
           placeholder="Search workouts..."
-          className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:border-drefit-lime outline-none"
+          className="input-field pl-10"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -44,18 +44,18 @@ export default function WorkoutsPage() {
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="glass-card p-5 h-32 animate-pulse" />
+            <div key={i} className="skeleton p-5 h-32" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-gray-400 text-center py-12">No workouts found.</p>
+        <p className="text-ink-muted text-center py-12">No workouts found.</p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((w) => (
             <Link key={w.$id} href={`/dashboard/workouts/${w.$id}`} className="group">
               <motion.div
                 whileHover={{ y: -4 }}
-                className="glass-card p-5 h-full flex flex-col justify-between hover:border-drefit-lime/40 transition-colors cursor-pointer"
+                className="glass-card p-5 h-full flex flex-col justify-between card-interactive cursor-pointer"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
@@ -64,10 +64,10 @@ export default function WorkoutsPage() {
                       {w.difficulty}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">{w.muscleGroup}</p>
+                  <p className="text-sm text-ink-muted mt-1">{w.muscleGroup}</p>
                 </div>
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                  <div className="flex gap-3 text-sm text-gray-400">
+                  <div className="flex gap-3 text-sm text-ink-muted">
                     <span className="flex items-center gap-1">
                       <Clock className="w-4 h-4" /> {w.duration}m
                     </span>

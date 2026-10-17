@@ -117,8 +117,8 @@ export default function ProgressPage() {
   const trendDown = (w?.trendKgPerWeek ?? 0) < 0
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl">Progress</h1>
+    <div className="page-shell space-y-6">
+      <h1 className="fade-up font-bold">Progress</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="progress-stats">
         <StatCard icon={<Flame className="text-drefit-lime" />} label="Current streak" value={data ? `${data.streaks.current} day${data.streaks.current === 1 ? "" : "s"}` : "—"} />
@@ -135,22 +135,22 @@ export default function ProgressPage() {
         <div className="flex items-baseline justify-between mb-2">
           <h2 className="text-lg">Weight</h2>
           {w?.latestWeight != null && (
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-ink-muted">
               Start {w.startWeight?.toFixed(1)} kg → now {w.latestWeight.toFixed(1)} kg
             </span>
           )}
         </div>
         <div className="h-72 flex items-center justify-center">
           {loadingData ? (
-            <p className="text-gray-400">Loading...</p>
+            <p className="text-ink-muted">Loading...</p>
           ) : chartData.length === 0 ? (
-            <p className="text-gray-400">No weight logged yet — add your first entry below.</p>
+            <p className="text-ink-muted">No weight logged yet — add your first entry below.</p>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData}>
-                <XAxis dataKey="day" stroke="#666" />
-                <YAxis stroke="#666" domain={["auto", "auto"]} />
-                <Tooltip />
+                <XAxis dataKey="day" stroke="#8B8B94" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis stroke="#8B8B94" tickLine={false} axisLine={false} fontSize={12} width={36} domain={["auto", "auto"]} />
+                <Tooltip contentStyle={{ background: "#18181B", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#F5F5F4" }} labelStyle={{ color: "#A1A1AA" }} cursor={{ stroke: "rgba(255,255,255,0.15)" }} />
                 <Area type="monotone" dataKey="weight" name="Weight (kg)" stroke="#C8F135" fill="#C8F135" fillOpacity={0.2} />
                 {chartData.length >= 2 && (
                   <Line type="linear" dataKey="trend" name="Trend" stroke="#ffffff" strokeDasharray="5 5" dot={false} />
@@ -162,13 +162,13 @@ export default function ProgressPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <button onClick={() => setShowWeightForm((v) => !v)} className="glass-card p-4 flex items-center gap-3">
+        <button onClick={() => setShowWeightForm((v) => !v)} className="glass-card card-interactive p-4 flex items-center gap-3">
           <Scale className="text-drefit-lime" /> Log Weight
         </button>
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadingPhoto}
-          className="glass-card p-4 flex items-center gap-3 disabled:opacity-50"
+          className="glass-card card-interactive p-4 flex items-center gap-3 disabled:opacity-50"
         >
           <Camera className="text-drefit-lime" /> {uploadingPhoto ? "Uploading..." : "Upload Photo"}
         </button>
@@ -188,10 +188,10 @@ export default function ProgressPage() {
             placeholder="Weight (kg)"
             value={weightInput}
             onChange={(e) => setWeightInput(e.target.value)}
-            className="flex-1 bg-white/5 border border-white/10 rounded p-2"
+            className="input-field flex-1"
             required
           />
-          <button type="submit" disabled={savingWeight} className="bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50">
+          <button type="submit" disabled={savingWeight} className="btn-primary">
             {savingWeight ? "Saving..." : "Save"}
           </button>
         </motion.form>
@@ -224,11 +224,11 @@ export default function ProgressPage() {
               />
             </div>
           ) : (
-            <p className="text-sm text-gray-400">Upload at least two photos to compare before and after.</p>
+            <p className="text-sm text-ink-muted">Upload at least two photos to compare before and after.</p>
           )}
 
           <div>
-            <p className="text-sm text-gray-400 mb-2">Timeline — tap a photo to set it as before or after.</p>
+            <p className="text-sm text-ink-muted mb-2">Timeline — tap a photo to set it as before or after.</p>
             <div className="flex gap-3 overflow-x-auto pb-2">
               {photos.map((photo) => (
                 <div key={photo.id} className="shrink-0 text-center">
@@ -240,12 +240,12 @@ export default function ProgressPage() {
                       photo.id === beforeId || photo.id === afterId ? "border-drefit-lime" : "border-transparent"
                     }`}
                   />
-                  <p className="text-xs text-gray-400 mt-1">{format(new Date(photo.takenAt), "MMM d, yyyy")}</p>
+                  <p className="text-xs text-ink-muted mt-1">{format(new Date(photo.takenAt), "MMM d, yyyy")}</p>
                   <div className="mt-1 flex justify-center gap-1 text-[10px]">
-                    <button onClick={() => setBeforeId(photo.id)} className={`rounded px-1.5 py-0.5 ${photo.id === beforeId ? "bg-drefit-lime text-drefit-dark" : "bg-white/10"}`}>
+                    <button onClick={() => setBeforeId(photo.id)} className={`rounded px-1.5 py-0.5 ${photo.id === beforeId ? "bg-accent text-accent-ink" : "bg-white/10"}`}>
                       Before
                     </button>
-                    <button onClick={() => setAfterId(photo.id)} className={`rounded px-1.5 py-0.5 ${photo.id === afterId ? "bg-drefit-lime text-drefit-dark" : "bg-white/10"}`}>
+                    <button onClick={() => setAfterId(photo.id)} className={`rounded px-1.5 py-0.5 ${photo.id === afterId ? "bg-accent text-accent-ink" : "bg-white/10"}`}>
                       After
                     </button>
                   </div>
@@ -262,10 +262,10 @@ export default function ProgressPage() {
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="glass-card p-4">
-      <div className="flex items-center gap-2 text-sm text-gray-400">
+      <div className="flex items-center gap-2 text-sm text-ink-muted">
         {icon} {label}
       </div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
+      <div className="stat-value mt-1">{value}</div>
     </div>
   )
 }

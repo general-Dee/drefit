@@ -118,8 +118,8 @@ export default function SettingsPage() {
   const status = session?.user?.subscriptionStatus
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <h1 className="text-3xl">Settings</h1>
+    <div className="page-shell max-w-2xl space-y-6">
+      <h1 className="fade-up font-bold">Settings</h1>
 
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -130,12 +130,12 @@ export default function SettingsPage() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={loadingProfile}
-          className="w-full bg-white/5 border border-white/10 rounded p-2 mb-2 disabled:opacity-50"
+          className="input-field mb-2 disabled:opacity-50"
         />
         <button
           onClick={handleSaveProfile}
           disabled={savingProfile || loadingProfile}
-          className="bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+          className="btn-primary"
         >
           {savingProfile ? "Saving..." : "Save"}
         </button>
@@ -161,7 +161,7 @@ export default function SettingsPage() {
         <div className="flex items-center gap-2">
           <MessageCircle className="text-drefit-lime" /> WhatsApp reminders
         </div>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-ink-muted">
           Get a daily workout reminder and a heads-up 3 days and 1 day before your trial or subscription ends.
         </p>
         <input
@@ -169,14 +169,14 @@ export default function SettingsPage() {
           placeholder="WhatsApp number, e.g. 0803 123 4567"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded p-2"
+          className="input-field"
         />
         <label className="flex items-center gap-2 text-sm">
           Remind me at
           <select
             value={reminderHour}
             onChange={(e) => setReminderHour(Number(e.target.value))}
-            className="bg-white/5 border border-white/10 rounded p-1"
+            className="input-field w-auto px-2 py-1.5"
           >
             {Array.from({ length: 17 }, (_, i) => i + 5).map((h) => (
               <option key={h} value={h} className="bg-drefit-dark">
@@ -193,7 +193,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSaveReminders}
           disabled={savingReminders}
-          className="bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+          className="btn-primary"
         >
           {savingReminders ? "Saving..." : "Save reminders"}
         </button>
@@ -205,10 +205,10 @@ export default function SettingsPage() {
         </div>
         <p className="text-drefit-lime text-xl">₦{PLAN_PRICE_NGN.toLocaleString()}/month</p>
         {status === "active" && periodEnd && (
-          <p className="text-gray-400 text-sm mt-1">Renews {format(new Date(periodEnd), "MMM d, yyyy")}</p>
+          <p className="text-ink-muted text-sm mt-1">Renews {format(new Date(periodEnd), "MMM d, yyyy")}</p>
         )}
         {status === "trialing" && session?.user?.trialEndsAt && (
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-ink-muted text-sm mt-1">
             Trial ends {format(new Date(session.user.trialEndsAt), "MMM d, yyyy")}
           </p>
         )}
@@ -219,15 +219,15 @@ export default function SettingsPage() {
           </button>
         ) : (
           <div className="mt-2 flex items-center gap-3">
-            <span className="text-sm text-gray-400">Are you sure?</span>
+            <span className="text-sm text-ink-muted">Are you sure?</span>
             <button
               onClick={handleCancelSubscription}
               disabled={cancelling}
-              className="text-red-400 font-medium disabled:opacity-50"
+              className="btn-danger"
             >
               {cancelling ? "Cancelling..." : "Yes, cancel"}
             </button>
-            <button onClick={() => setConfirmingCancel(false)} className="text-gray-400">
+            <button onClick={() => setConfirmingCancel(false)} className="text-ink-muted">
               Never mind
             </button>
           </div>

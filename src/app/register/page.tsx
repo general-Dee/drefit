@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { signIn, getSession } from "next-auth/react"
 import toast from "react-hot-toast"
+import Link from "next/link"
+import AuthShell from "@/components/ui/AuthShell"
 
 export const dynamic = 'force-dynamic'
 
@@ -62,21 +64,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="glass-card p-8 max-w-md w-full">
-        <h1 className="text-3xl mb-6">Join Drefit</h1>
-        {ref && (
-          <p className="mb-4 rounded border border-drefit-lime/40 bg-drefit-lime/10 p-3 text-sm">
-            You were invited by a friend (code {ref}). Make your first payment and you both get 30 extra days.
-          </p>
-        )}
-        <form onSubmit={handleSubmit}>
-          <input type="text" placeholder="Full Name" className="w-full bg-white/5 border border-white/10 rounded p-3 mb-4" value={name} onChange={e=>setName(e.target.value)} required />
-          <input type="email" placeholder="Email" className="w-full bg-white/5 border border-white/10 rounded p-3 mb-4" value={email} onChange={e=>setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" className="w-full bg-white/5 border border-white/10 rounded p-3 mb-4" value={password} onChange={e=>setPassword(e.target.value)} required />
-          <button type="submit" disabled={loading} className="w-full lime-gradient text-drefit-dark font-bold py-3 rounded">Create Account</button>
-        </form>
-      </div>
-    </div>
+    <AuthShell
+      title="Join Drefit"
+      subtitle="Start your 7-day free trial. Cancel anytime."
+      footer={<>Already have an account? <Link href="/login" className="font-semibold text-accent">Sign in</Link></>}
+    >
+      {ref && (
+        <p className="mb-4 rounded-xl border border-accent/40 bg-accent/10 p-3 text-sm">
+          You were invited by a friend (code <span className="font-semibold tabular-nums">{ref}</span>). Make your first payment and you both get 30 extra days.
+        </p>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input type="text" autoComplete="name" aria-label="Full name" placeholder="Full name" className="input-field" value={name} onChange={e=>setName(e.target.value)} required />
+        <input type="email" autoComplete="email" aria-label="Email" placeholder="Email" className="input-field" value={email} onChange={e=>setEmail(e.target.value)} required />
+        <input type="password" autoComplete="new-password" aria-label="Password" placeholder="Password" className="input-field" value={password} onChange={e=>setPassword(e.target.value)} required />
+        <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">{loading ? "Creating account..." : "Create account"}</button>
+      </form>
+    </AuthShell>
   )
 }

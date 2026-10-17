@@ -1,9 +1,9 @@
 ﻿"use client"
 import { useState, useEffect, useCallback } from "react"
-import { motion } from "framer-motion"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
+import Logo from "@/components/ui/Logo"
 import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
 
 export const dynamic = 'force-dynamic'
@@ -98,18 +98,20 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center section-padding">
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 max-w-md w-full text-center">
-        <h1 className="text-3xl mb-2">{isRenewal ? "Renew Subscription" : "Premium Monthly"}</h1>
-        <p className="text-drefit-lime text-4xl mb-2">₦{PLAN_PRICE_NGN.toLocaleString()}</p>
-        <p className="text-gray-400 mb-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
+      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
+      <Logo className="relative mb-8" />
+      <div className="glass-card fade-up relative p-6 sm:p-8 max-w-md w-full text-center">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2">{isRenewal ? "Renew Subscription" : "Premium Monthly"}</h1>
+        <p className="my-3 font-display text-5xl font-bold tabular-nums tracking-tight text-accent">₦{PLAN_PRICE_NGN.toLocaleString()}</p>
+        <p className="text-ink-muted mb-6">
           {isRenewal ? "Your last billing period has ended — renew to keep your access." : "per month, billed monthly"}
         </p>
-        <button onClick={handleSubscribe} disabled={loading || !PaystackPop} className="w-full lime-gradient text-drefit-dark font-bold py-3 rounded-lg disabled:opacity-50">
+        <button onClick={handleSubscribe} disabled={loading || !PaystackPop} className="btn-primary w-full py-4 text-base shadow-glow">
           {loading ? "Processing..." : isRenewal ? "Renew Now" : "Subscribe Now"}
         </button>
-        <p className="text-gray-500 text-sm mt-4">Cancel anytime. No commitment.</p>
-      </motion.div>
+        <p className="text-ink-subtle text-sm mt-4">Cancel anytime. No commitment.</p>
+      </div>
     </div>
   )
 }

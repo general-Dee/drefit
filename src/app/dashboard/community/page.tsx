@@ -106,13 +106,13 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl">Community</h1>
+    <div className="page-shell space-y-6">
+      <h1 className="fade-up font-bold">Community</h1>
 
       <div className="glass-card p-4">
         <textarea
           placeholder="Share your fitness journey..."
-          className="w-full bg-white/5 rounded p-3"
+          className="input-field"
           rows={2}
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -120,16 +120,16 @@ export default function CommunityPage() {
         <button
           onClick={handlePost}
           disabled={posting || !content.trim()}
-          className="mt-2 bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+          className="btn-primary mt-2"
         >
           {posting ? "Posting..." : "Post"}
         </button>
       </div>
 
       {loading ? (
-        <p className="text-gray-400">Loading...</p>
+        <p className="text-ink-muted">Loading...</p>
       ) : posts.length === 0 ? (
-        <p className="text-gray-400">No posts yet — be the first to share something.</p>
+        <p className="text-ink-muted">No posts yet — be the first to share something.</p>
       ) : (
         posts.map((p) => {
           const liked = !!userId && p.likedBy.includes(userId)
@@ -143,11 +143,11 @@ export default function CommunityPage() {
               <div className="flex gap-4 mt-3">
                 <button
                   onClick={() => handleToggleLike(p)}
-                  className={`flex gap-1 ${liked ? "text-drefit-lime" : "text-gray-400"}`}
+                  className={`flex gap-1 ${liked ? "text-drefit-lime" : "text-ink-muted"}`}
                 >
                   <Heart className="w-4 h-4" /> {p.likedBy.length}
                 </button>
-                <button onClick={() => handleToggleComments(p.$id)} className="flex gap-1 text-gray-400">
+                <button onClick={() => handleToggleComments(p.$id)} className="flex gap-1 text-ink-muted">
                   <MessageCircle className="w-4 h-4" />
                   {expanded[p.$id] ? (comments[p.$id]?.length ?? 0) : "Comments"}
                 </button>
@@ -164,7 +164,7 @@ export default function CommunityPage() {
                     <input
                       type="text"
                       placeholder="Add a comment..."
-                      className="flex-1 bg-white/5 border border-white/10 rounded p-2 text-sm"
+                      className="input-field flex-1 py-2.5 text-sm"
                       value={commentDrafts[p.$id] ?? ""}
                       onChange={(e) => setCommentDrafts((prev) => ({ ...prev, [p.$id]: e.target.value }))}
                     />
@@ -188,7 +188,7 @@ export default function CommunityPage() {
           <Trophy className="text-drefit-lime" /> Weekly Leaderboard
         </div>
         {leaderboard.length === 0 ? (
-          <p className="text-sm text-gray-400">No workouts completed this week yet.</p>
+          <p className="text-sm text-ink-muted">No workouts completed this week yet.</p>
         ) : (
           <ol className="space-y-1 text-sm">
             {leaderboard.map((entry, i) => (

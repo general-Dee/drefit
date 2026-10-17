@@ -2,7 +2,9 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { ArrowLeft } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import { ArrowLeft, Check, Dumbbell, Flame, HeartPulse, Home, Moon, Sparkles, StretchHorizontal, Zap } from "lucide-react"
+import Logo from "@/components/ui/Logo"
 import toast from "react-hot-toast"
 import type { FirstWeekPlan } from "@/lib/first-week-plan"
 
@@ -59,6 +61,7 @@ export default function OnboardingPage() {
   const { status } = useSession()
   const router = useRouter()
   const [step, setStep] = useState(0)
+  const [dir, setDir] = useState(1)
   const [saving, setSaving] = useState(false)
   const [plan, setPlan] = useState<FirstWeekPlan | null>(null)
   const [answers, setAnswers] = useState<Answers>({
@@ -96,7 +99,10 @@ export default function OnboardingPage() {
   const next = (updated: Answers) => {
     setAnswers(updated)
     if (step === ONBOARDING_STEPS.length - 1) submit(updated)
-    else setStep(step + 1)
+    else {
+      setDir(1)
+      setStep(step + 1)
+    }
   }
 
   const choose = (opt: Option) => {
@@ -109,78 +115,219 @@ export default function OnboardingPage() {
     next({ ...answers, [current.key]: opt.value } as Answers)
   }
 
-  if (status === "loading") return <div className="text-center mt-20">Loading...</div>
+  const back = () => {
+    setDir(-1)
+    setStep(Math.max(0, step - 1))
+  }
 
-  if (plan) {
+  if (status === "loading") {
     return (
-      <div className="min-h-screen p-6 flex items-center justify-center">
-        <div className="glass-card p-6 max-w-lg w-full space-y-4" data-testid="first-week-reveal">
-          <h1 className="text-3xl">Your first week is ready</h1>
-          <p className="text-gray-400">
-            {plan.workoutDays} training days · {plan.totalMinutes} minutes total, picked from your coach&apos;s workouts.
-          </p>
-          <ul className="space-y-2">
-            {plan.days.map((d) => (
-              <li key={d.day} className="flex justify-between gap-3 border-b border-white/10 pb-2 text-sm">
-                <span className="text-gray-400">Day {d.day} · {d.weekday.slice(0, 3)}</span>
-                <span>{d.type === "workout" ? `${d.workout?.name} (${d.workout?.duration} min)` : d.type === "mobility" ? "Mobility session" : "Rest"}</span>
-              </li>
-            ))}
-          </ul>
-          {plan.notes.map((n) => (
-            <p key={n} className="text-xs text-gray-500">{n}</p>
-          ))}
-          <button onClick={() => router.push("/dashboard")} className="w-full bg-drefit-lime text-drefit-dark font-bold py-3 rounded-lg">
-            Start my first week
-          </button>
-        </div>
+      <div className="grid min-h-screen place-items-center" aria-busy="true">
+        <div className="skeleton h-2 w-40" />
       </div>
     )
   }
 
+  if (plan) return <Reveal plan={plan} onStart={() => router.push("/dashboard")} />
+
   return (
-    <div className="min-h-screen p-6 flex items-center justify-center">
-      <div className="glass-card p-8 max-w-md w-full">
-        <div className="mb-4 h-1.5 w-full rounded bg-white/10" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded bg-drefit-lime" style={{ width: `${progress}%` }} />
+    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
+
+      {/* Top bar: back + progress */}
+      <header className="relative z-10 mx-auto w-full max-w-xl px-5 pt-5">
+        <div className="flex h-10 items-center justify-between">
+          {step > 0 ? (
+            <button onClick={back} disabled={saving} className="btn-ghost -ml-3" aria-label="Back">
+              <ArrowLeft className="h-5 w-5" /> Back
+            </button>
+          ) : (
+            <Logo href="/onboarding" />
+          )}
+          <span className="text-xs font-medium tabular-nums text-ink-subtle">
+            {step + 1} / {ONBOARDING_STEPS.length}
+          </span>
         </div>
-        {step > 0 && (
-          <button onClick={() => setStep(step - 1)} className="mb-3 flex items-center gap-1 text-sm text-gray-400">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-        )}
-        <h2 className="text-2xl mb-1">{current.title}</h2>
-        {current.subtitle && <p className="text-sm text-gray-400 mb-4">{current.subtitle}</p>}
-        {current.options.map((opt) => {
-          const selected = current.multi ? answers.limitations.includes(String(opt.value)) : answers[current.key] === opt.value
-          return (
-            <button
-              key={String(opt.value)}
-              disabled={saving}
-              onClick={() => choose(opt)}
-              aria-pressed={selected}
-              className={`w-full glass-card p-3 mb-2 text-left hover:border-drefit-lime disabled:opacity-50 ${selected ? "border-drefit-lime" : ""}`}
+        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+          <motion.div
+            className="h-full origin-left rounded-full bg-accent"
+            initial={false}
+            animate={{ scaleX: Math.max(0.04, (step + (saving ? 1 : 0.5)) / ONBOARDING_STEPS.length) }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </div>
+      </header>
+
+      <main className="relative z-10 mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-8 pt-8">
+        <AnimatePresence mode="wait" custom={dir} initial={false}>
+          <motion.section
+            key={step}
+            custom={dir}
+            variants={{
+              enter: (d: number) => ({ opacity: 0, x: d * 40 }),
+              center: { opacity: 1, x: 0 },
+              exit: (d: number) => ({ opacity: 0, x: d * -40 }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-1 flex-col"
+          >
+            <div className="eyebrow mb-3">Step {step + 1}</div>
+            <h1 className="font-display text-3xl font-bold sm:text-4xl">{current.title}</h1>
+            {current.subtitle && <p className="mt-2 text-ink-muted">{current.subtitle}</p>}
+
+            <div className={`mt-8 grid gap-3 ${current.key === "daysPerWeek" ? "grid-cols-5" : current.multi ? "grid-cols-2" : ""}`}>
+              {current.options.map((opt) => {
+                const selected = current.multi ? answers.limitations.includes(String(opt.value)) : answers[current.key] === opt.value
+                const Icon = OPTION_ICONS[String(opt.value)]
+                const compact = current.key === "daysPerWeek"
+                return (
+                  <motion.button
+                    key={String(opt.value)}
+                    disabled={saving}
+                    onClick={() => choose(opt)}
+                    aria-pressed={selected}
+                    whileTap={{ scale: 0.97 }}
+                    className={`glass-card group flex text-left transition-colors disabled:opacity-50 ${
+                      compact ? "flex-col items-center justify-center px-2 py-5 text-center" : "items-center gap-4 p-4 sm:p-5"
+                    } ${selected ? "!border-accent bg-accent/10 shadow-glow" : "hover:!border-white/20"}`}
+                  >
+                    {compact ? (
+                      <>
+                        <span className="font-display text-3xl font-bold tabular-nums">{opt.value}</span>
+                        <span className="mt-1 text-xs text-ink-muted">days</span>
+                      </>
+                    ) : (
+                      <>
+                        {Icon && (
+                          <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-colors ${selected ? "bg-accent text-accent-ink" : "bg-white/[0.06] text-accent"}`}>
+                            <Icon className="h-5 w-5" />
+                          </span>
+                        )}
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold">{opt.label}</span>
+                          {opt.hint && <span className="mt-0.5 block text-sm text-ink-muted">{opt.hint}</span>}
+                        </span>
+                        {current.multi && (
+                          <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border ${selected ? "border-accent bg-accent text-accent-ink" : "border-white/20"}`}>
+                            {selected && <Check className="h-3.5 w-3.5" />}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </motion.button>
+                )
+              })}
+            </div>
+
+            {current.multi && (
+              <div className="mt-4 space-y-4">
+                <textarea
+                  placeholder="Anything else your coach should know? (optional)"
+                  aria-label="Anything else your coach should know?"
+                  value={answers.limitationsNote}
+                  maxLength={300}
+                  rows={3}
+                  onChange={(e) => setAnswers({ ...answers, limitationsNote: e.target.value })}
+                  className="input-field resize-none text-sm"
+                />
+              </div>
+            )}
+
+            <div className="mt-auto pt-8">
+              {current.multi && (
+                <button onClick={() => next(answers)} disabled={saving} className="btn-primary w-full py-4 text-base">
+                  {saving ? "Building your first week…" : answers.limitations.length ? "Continue" : "None — continue"}
+                </button>
+              )}
+              {!current.multi && saving && <p className="text-center text-sm text-ink-muted">Building your first week…</p>}
+            </div>
+          </motion.section>
+        </AnimatePresence>
+      </main>
+    </div>
+  )
+}
+
+const OPTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  "weight-loss": Flame,
+  "muscle-gain": Dumbbell,
+  endurance: HeartPulse,
+  beginner: Sparkles,
+  intermediate: Zap,
+  advanced: Flame,
+  none: StretchHorizontal,
+  home: Home,
+  gym: Dumbbell,
+}
+
+function Reveal({ plan, onStart }: { plan: FirstWeekPlan; onStart: () => void }) {
+  return (
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-5 py-10" data-testid="first-week-reveal">
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/3 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-[120px]"
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+      />
+      <div className="relative w-full max-w-lg">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.1 }}
+          className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-accent text-accent-ink shadow-glow"
+        >
+          <Check className="h-8 w-8" strokeWidth={3} />
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }} className="mt-6 text-center">
+          <div className="eyebrow">All set</div>
+          <h1 className="mt-2 font-display text-4xl font-bold sm:text-5xl">Your first week is ready</h1>
+          <p className="mt-3 text-ink-muted">
+            <span className="font-semibold tabular-nums text-ink">{plan.workoutDays}</span> training days ·{" "}
+            <span className="font-semibold tabular-nums text-ink">{plan.totalMinutes}</span> minutes total, picked from your coach&apos;s workouts.
+          </p>
+        </motion.div>
+
+        <ul className="mt-8 space-y-2">
+          {plan.days.map((d, i) => (
+            <motion.li
+              key={d.day}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 + i * 0.07, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className={`glass-card flex items-center gap-4 px-4 py-3 ${d.type === "workout" ? "" : "opacity-80"}`}
             >
-              <div>{opt.label}</div>
-              {opt.hint && <div className="text-xs text-gray-400">{opt.hint}</div>}
-            </button>
-          )
-        })}
-        {current.multi && (
-          <>
-            <textarea
-              placeholder="Anything else your coach should know? (optional)"
-              value={answers.limitationsNote}
-              maxLength={300}
-              onChange={(e) => setAnswers({ ...answers, limitationsNote: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded p-2 text-sm mb-3"
-            />
-            <button onClick={() => next(answers)} disabled={saving} className="w-full bg-drefit-lime text-drefit-dark font-bold py-3 rounded-lg disabled:opacity-50">
-              {answers.limitations.length ? "Continue" : "None — continue"}
-            </button>
-          </>
-        )}
-        {saving && <p className="mt-3 text-sm text-gray-400">Building your first week…</p>}
+              <span className="w-12 shrink-0">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-ink-subtle">Day {d.day}</span>
+                <span className="block text-sm font-semibold">{d.weekday.slice(0, 3)}</span>
+              </span>
+              <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${d.type === "workout" ? "bg-accent/15 text-accent" : "bg-white/[0.05] text-ink-muted"}`}>
+                {d.type === "workout" ? <Dumbbell className="h-4 w-4" /> : d.type === "mobility" ? <StretchHorizontal className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm">
+                {d.type === "workout" ? d.workout?.name : d.type === "mobility" ? "Mobility session" : "Rest"}
+              </span>
+              {d.type === "workout" && <span className="chip tabular-nums">{d.workout?.duration} min</span>}
+            </motion.li>
+          ))}
+        </ul>
+
+        {plan.notes.map((n) => (
+          <p key={n} className="mt-4 text-center text-xs text-ink-subtle">{n}</p>
+        ))}
+
+        <motion.button
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 + plan.days.length * 0.07 }}
+          onClick={onStart}
+          className="btn-primary mt-8 w-full py-4 text-base shadow-glow"
+        >
+          Start my first week
+        </motion.button>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 ﻿import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { Providers } from "./providers"
+import { bodyFont, displayFont } from "./fonts"
 export const metadata: Metadata = {
   title: "Drefit - Elite Fitness Coaching Nigeria",
   description: "Personalized coaching, coach-designed diet plans, and community support.",
@@ -13,8 +14,8 @@ export const viewport: Viewport = {
 }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-drefit-dark">
+    <html lang="en" className={`dark ${displayFont.variable} ${bodyFont.variable}`}>
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

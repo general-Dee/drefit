@@ -9,10 +9,17 @@ import { z } from "zod"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
-import { rateLimit, getClientIp } from "@/lib/rate-limit"
+import { getClientIp } from "@/lib/rate-limit"
+import { isLoginLocked, recordLoginFailure, clearLoginFailures } from "@/lib/login-throttle"
 import { isAdminEmail, resolveRole } from "@/lib/admin"
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(6) })
+
+let dummyHashPromise: Promise<string> | null = null
+function dummyHash(): Promise<string> {
+  dummyHashPromise ??= hash(randomUUID(), 10)
+  return dummyHashPromise
+}
 
 class RateLimitedSignin extends CredentialsSignin {
   static type = "RateLimited"
@@ -55,14 +62,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!parsed.success) return null
 
         const ip = getClientIp(request)
-        if (!rateLimit(`login:${ip}:${parsed.data.email}`, 5, 60_000).success) {
+        const { email, password } = parsed.data
+        // Persistent lockout (Appwrite-backed). Applied identically whether or
+        // not the account exists, so it can't be used to enumerate emails.
+        if (await isLoginLocked(ip, email)) {
           throw new RateLimitedSignin()
         }
 
-        const user = await findUserByEmail(parsed.data.email)
-        if (!user) return null
-        const isValid = await compare(parsed.data.password, user.password)
-        if (!isValid) return null
+        const user = await findUserByEmail(email)
+        // Always run a bcrypt comparison so response timing doesn't reveal
+        // whether the email is registered.
+        const isValid = await compare(password, user?.password ?? (await dummyHash()))
+        if (!user || !isValid) {
+          await recordLoginFailure(ip, email)
+          return null
+        }
+        await clearLoginFailures(ip, email)
         return {
           id: user.$id,
           email: user.email,

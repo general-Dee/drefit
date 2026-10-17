@@ -1,79 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
-import { Query } from "node-appwrite";
-import { serverDatabases } from "@/lib/appwrite/server";
-import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema";
-import { PLAN_PERIOD_DAYS } from "@/lib/paystack/plan";
+import { NextRequest, NextResponse } from "next/server"
+import {
+  applyVerifiedCharge,
+  fetchVerifiedTransaction,
+  isValidReference,
+  verifyPaystackSignature,
+} from "@/lib/paystack/charge"
 
 export async function POST(req: NextRequest) {
+  // 1. Verify the HMAC-SHA512 signature over the raw body (constant-time).
+  const rawBody = await req.text()
+  if (!verifyPaystackSignature(rawBody, req.headers.get("x-paystack-signature"), process.env.PAYSTACK_SECRET_KEY)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+  }
+
+  let event: { event?: string; data?: { reference?: unknown; status?: string } }
   try {
-    // 1. Verify Paystack signature (security)
-    const signature = req.headers.get("x-paystack-signature");
-    const rawBody = await req.text();
+    event = JSON.parse(rawBody)
+  } catch {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+  }
 
-    if (!signature) {
-      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+  // 2. Only successful charges can grant access; acknowledge everything else.
+  if (event.event !== "charge.success" || event.data?.status !== "success") {
+    return NextResponse.json({ received: true, ignored: true })
+  }
+  const reference = event.data?.reference
+  if (!isValidReference(reference)) {
+    console.warn("paystack webhook: invalid reference")
+    return NextResponse.json({ received: true, ignored: true })
+  }
+
+  try {
+    // 3. Re-confirm with Paystack and use its authoritative data (amount,
+    //    currency, status, customer) rather than the webhook payload alone.
+    const tx = await fetchVerifiedTransaction(reference)
+    const result = await applyVerifiedCharge(tx, "webhook")
+    if (result.status === "rejected" || result.status === "user_not_found") {
+      console.warn(`paystack webhook: ${reference} not applied (${result.status}${"reason" in result ? `: ${result.reason}` : ""})`)
+    } else {
+      console.log(`paystack webhook: ${reference} ${result.status}`)
     }
-
-    const secret = process.env.PAYSTACK_SECRET_KEY!;
-    const hash = crypto
-      .createHmac("sha512", secret)
-      .update(rawBody)
-      .digest("hex");
-
-    if (hash !== signature) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-
-    // 2. Parse the event
-    const event = JSON.parse(rawBody);
-    const { event: eventType, data } = event;
-
-    // 3. Handle successful charge
-    if (eventType === "charge.success") {
-      const email = data.customer.email;
-      const subscriptionId = data.reference; // Paystack transaction reference
-
-      // 4. Find user in Appwrite by email
-      const users = await serverDatabases.listDocuments(
-        DATABASE_ID,
-        USERS_COLLECTION_ID,
-        [Query.equal("email", email)]
-      );
-
-      if (users.documents.length === 0) {
-        console.error(`User not found: ${email}`);
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
-      const userId = users.documents[0].$id;
-
-      // Base the period on the charge's own timestamp, not the time the
-      // webhook happens to be delivered/retried.
-      const paidAt = data.paid_at ? new Date(data.paid_at) : new Date();
-      const subscriptionCurrentPeriodEnd = new Date(
-        paidAt.getTime() + PLAN_PERIOD_DAYS * 24 * 60 * 60 * 1000
-      ).toISOString();
-
-      // 5. Update subscription status
-      await serverDatabases.updateDocument(
-        DATABASE_ID,
-        USERS_COLLECTION_ID,
-        userId,
-        {
-          subscriptionStatus: "active",
-          subscriptionId: subscriptionId,
-          subscriptionCurrentPeriodEnd,
-        }
-      );
-
-      console.log(`Subscription activated for ${email}`);
-    }
-
-    // 6. Acknowledge receipt (Paystack requires a 200 OK)
-    return NextResponse.json({ received: true });
+    // 4. Paystack requires a 200 to stop retrying.
+    return NextResponse.json({ received: true, status: result.status })
   } catch (error) {
-    console.error("Webhook error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // Transient failure (Paystack/Appwrite): return 500 so Paystack retries.
+    console.error("paystack webhook error", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

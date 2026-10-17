@@ -24,7 +24,7 @@ export default function LoginPage() {
       await signIn("credentials", { email, password, redirect: false }).catch(() => {})
       const session = await getSession()
       if (!session) {
-        toast.error("Invalid email or password.")
+        toast.error("Invalid email or password. After several failed attempts, sign-in is paused for 15 minutes.")
         return
       }
       router.push("/dashboard")

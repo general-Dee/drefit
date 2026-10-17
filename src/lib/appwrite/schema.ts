@@ -128,3 +128,32 @@ export interface CoachingMessageDoc {
   content: string
   createdAt: string
 }
+
+// Security collections, provisioned by scripts/appwrite-security-schema.mjs
+// (runs automatically before `next build` via scripts/migrate-appwrite.mjs).
+export const LOGIN_ATTEMPTS_COLLECTION_ID = "loginAttempts"
+export const PAYMENT_EVENTS_COLLECTION_ID = "paymentEvents"
+
+// Documents in `loginAttempts`. $id is a hash of (scope, key) so no raw
+// email or IP is stored.
+export interface LoginAttemptDoc {
+  $id: string
+  scope: "ip_email" | "email"
+  failures: number
+  windowStart: string
+  lockedUntil?: string | null
+}
+
+// Documents in `paymentEvents` — one per Paystack reference that has granted
+// access. $id is derived from the reference and `reference` has a unique index,
+// so a reference can only ever be applied once.
+export interface PaymentEventDoc {
+  $id: string
+  reference: string
+  userId: string
+  amount: number
+  currency: string
+  source: "webhook" | "verify"
+  processedAt: string
+  periodEnd?: string
+}

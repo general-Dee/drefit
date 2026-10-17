@@ -6,6 +6,7 @@
 // Run with: node --env-file=.env.local scripts/seed-appwrite.mjs
 
 import { Client, Databases, Storage, ID, Query, DatabasesIndexType, OrderBy } from "node-appwrite"
+import { ensureSecuritySchema } from "./appwrite-security-schema.mjs"
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID
 const client = new Client()
@@ -223,6 +224,9 @@ async function main() {
   await waitForAttributes("coachingMessages", ["userId", "senderId", "senderName", "isFromAdmin", "content", "createdAt"])
   await ensureIndex("coachingMessages", "userId_createdAt", ["userId", "createdAt"], [OrderBy.Asc, OrderBy.Asc])
   await ensureIndex("coachingMessages", "createdAt_idx", ["createdAt"], [OrderBy.Desc])
+
+  // --- loginAttempts + paymentEvents (security) ---
+  await ensureSecuritySchema(databases, DATABASE_ID)
 
   // --- progress-photos bucket ---
   await ensureBucket("progress-photos", "Progress Photos")

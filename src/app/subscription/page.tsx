@@ -1,5 +1,5 @@
 ﻿"use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -9,7 +9,7 @@ import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
 export const dynamic = 'force-dynamic'
 
 export default function SubscriptionPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [PaystackPop, setPaystackPop] = useState<any>(null)
@@ -23,6 +23,44 @@ export default function SubscriptionPage() {
   useEffect(() => {
     import("@paystack/inline-js").then((mod) => setPaystackPop(() => mod.default))
   }, [])
+
+  // Access is only granted server-side after Paystack's verify API confirms
+  // the charge; the client callback alone never unlocks anything.
+  const verifyPayment = useCallback(
+    async (reference: string) => {
+      setLoading(true)
+      try {
+        const res = await fetch("/api/paystack/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reference }),
+        })
+        const result = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          toast.error(result.error || "We couldn't confirm your payment yet.")
+          return
+        }
+        await update()
+        toast.success("Payment confirmed. Welcome to Premium!")
+        router.push("/dashboard")
+        router.refresh()
+      } finally {
+        setLoading(false)
+      }
+    },
+    [router, update]
+  )
+
+  // Redirect-flow fallback: Paystack returns to /subscription?reference=...
+  useEffect(() => {
+    if (status !== "authenticated") return
+    const params = new URLSearchParams(window.location.search)
+    const reference = params.get("reference") ?? params.get("trxref")
+    if (reference) {
+      window.history.replaceState(null, "", "/subscription")
+      verifyPayment(reference)
+    }
+  }, [status, verifyPayment])
 
   const handleSubscribe = async () => {
     if (status !== "authenticated") {
@@ -45,7 +83,7 @@ export default function SubscriptionPage() {
 
       const paystack = new PaystackPop()
       paystack.resumeTransaction(data.access_code, {
-        onSuccess: () => router.push("/dashboard"),
+        onSuccess: (tx: { reference?: string }) => verifyPayment(tx?.reference ?? data.reference),
         onCancel: () => setLoading(false),
         onError: (error: { message: string }) => {
           toast.error(error.message || "Payment failed")

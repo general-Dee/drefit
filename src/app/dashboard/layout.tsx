@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { hasActiveAccess } from "@/lib/subscription"
 import DashboardNav from "@/components/DashboardNav"
+import OfflineBanner from "@/components/OfflineBanner"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -13,6 +14,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
+      <OfflineBanner />
       <DashboardNav role={session.user.role} />
       {children}
     </>

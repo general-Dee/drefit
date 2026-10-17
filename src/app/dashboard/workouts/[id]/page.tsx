@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle, Clock, Flame } from "lucide-react"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import type { Exercise, WorkoutDoc } from "@/lib/appwrite/schema"
+import { enqueueCompletion, isNetworkError, newClientId, postCompletion } from "@/lib/offline-queue"
 
 export const dynamic = "force-dynamic"
 
@@ -49,10 +50,22 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
     if (next.length === exercises.length) {
       confetti({ particleCount: 150, spread: 70, colors: ["#C8F135", "#0D0DDD"] })
       toast.success("🎉 Workout complete!")
-      const res = await fetch(`/api/workouts/${params.id}/complete`, { method: "POST" })
-      if (res.ok) {
+      const entry = { clientId: newClientId(), workoutId: params.id, completedAt: new Date().toISOString() }
+      try {
+        if (!navigator.onLine) throw new TypeError("offline")
+        const res = await postCompletion(entry)
+        if (res.ok || res.status === 409) {
+          setCompletionCount((c) => c + 1)
+          setLastCompletedAt(entry.completedAt)
+        }
+      } catch (err) {
+        if (!isNetworkError(err)) throw err
+        // Offline: save locally; ServiceWorkerRegistrar syncs when back online.
+        enqueueCompletion(window.localStorage, entry)
+        window.dispatchEvent(new Event("storage"))
         setCompletionCount((c) => c + 1)
-        setLastCompletedAt(new Date().toISOString())
+        setLastCompletedAt(entry.completedAt)
+        toast("Saved offline — it will sync when you're back online.", { icon: "📶" })
       }
     }
   }

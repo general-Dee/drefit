@@ -5,6 +5,7 @@
 // Run manually with: node --env-file=.env.local scripts/migrate-appwrite.mjs
 import { Client, Databases } from "node-appwrite"
 import { ensureSecuritySchema } from "./appwrite-security-schema.mjs"
+import { ensureUpgradesSchema } from "./appwrite-upgrades-schema.mjs"
 
 const { NEXT_PUBLIC_APPWRITE_ENDPOINT: endpoint, NEXT_PUBLIC_APPWRITE_PROJECT_ID: project, APPWRITE_API_KEY: key, NEXT_PUBLIC_APPWRITE_DATABASE_ID: databaseId } = process.env
 
@@ -16,7 +17,11 @@ if (!endpoint || !project || !key || !databaseId) {
 const client = new Client().setEndpoint(endpoint).setProject(project).setKey(key)
 try {
   console.log("[migrate-appwrite] Ensuring security collections...")
-  await ensureSecuritySchema(new Databases(client), databaseId, (m) => console.log(`[migrate-appwrite]${m}`))
+  const databases = new Databases(client)
+  const log = (m) => console.log(`[migrate-appwrite]${m}`)
+  await ensureSecuritySchema(databases, databaseId, log)
+  console.log("[migrate-appwrite] Ensuring upgrade collections/attributes...")
+  await ensureUpgradesSchema(databases, databaseId, log)
   console.log("[migrate-appwrite] Done.")
 } catch (err) {
   // Don't block deploys on an unreachable/paused Appwrite project: the code

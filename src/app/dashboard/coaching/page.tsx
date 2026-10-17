@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { RefreshCw, Send } from "lucide-react"
 import toast from "react-hot-toast"
 import type { CoachingMessageDoc } from "@/lib/appwrite/schema"
+import CoachWhatsAppButton from "@/components/CoachWhatsAppButton"
 
 export const dynamic = "force-dynamic"
 
@@ -56,6 +57,8 @@ export default function CoachingPage() {
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl">Coaching</h1>
+        <div className="flex items-center gap-3">
+        <CoachWhatsAppButton />
         <button
           onClick={handleRefresh}
           disabled={refreshing}
@@ -63,6 +66,7 @@ export default function CoachingPage() {
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /> Refresh
         </button>
+        </div>
       </div>
 
       <div className="glass-card p-4 space-y-3 min-h-[300px]">

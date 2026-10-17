@@ -35,6 +35,10 @@ export interface AppwriteUserDoc {
   passwordResetTokenHash?: string
   passwordResetExpires?: string
   notificationsEnabled?: boolean
+  // WhatsApp reminders (E.164 phone, explicit opt-in, Lagos hour 0-23)
+  phone?: string | null
+  whatsappOptIn?: boolean | null
+  reminderHour?: number | null
 }
 
 // Documents in the `progressLogs` collection.
@@ -156,4 +160,17 @@ export interface PaymentEventDoc {
   source: "webhook" | "verify"
   processedAt: string
   periodEnd?: string
+}
+
+// Customer upgrades (provisioned by scripts/appwrite-upgrades-schema.mjs).
+export const REMINDER_LOG_COLLECTION_ID = "reminderLog"
+
+// One document per (user, reminder type, Lagos day) — the dedupe record.
+export interface ReminderLogDoc {
+  $id: string
+  userId: string
+  type: string
+  day: string
+  status: "sending" | "sent"
+  createdAt: string
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Flame, Calendar, Award, TrendingUp } from "lucide-react"
+import CoachWhatsAppButton from "@/components/CoachWhatsAppButton"
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +43,10 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl">Welcome back, {userName || "Athlete"}! 💪</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl">Welcome back, {userName || "Athlete"}! 💪</h1>
+        <CoachWhatsAppButton />
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="glass-card p-4 flex items-center gap-3">
           <Flame className="text-drefit-lime"/> Calories Today: {stats ? stats.caloriesToday.toLocaleString() : "—"}

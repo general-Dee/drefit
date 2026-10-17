@@ -89,7 +89,7 @@ export async function fetchVerifiedTransaction(reference: string): Promise<Payst
   return body.data as PaystackTransaction
 }
 
-async function findUser(tx: PaystackTransaction): Promise<AppwriteUserDoc | null> {
+export async function findUser(tx: PaystackTransaction): Promise<AppwriteUserDoc | null> {
   const id = metadataUserId(tx.metadata)
   if (id) {
     const doc = await serverDatabases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, id).catch((err) => {

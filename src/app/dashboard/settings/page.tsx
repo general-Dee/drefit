@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Bell, User, CreditCard } from "lucide-react"
+import { Bell, User, CreditCard, MessageCircle } from "lucide-react"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
@@ -18,6 +18,42 @@ export default function SettingsPage() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [whatsappOptIn, setWhatsappOptIn] = useState(false)
+  const [reminderHour, setReminderHour] = useState(7)
+  const [savingReminders, setSavingReminders] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/settings/reminders")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return
+        setPhone(data.phone ?? "")
+        setWhatsappOptIn(!!data.whatsappOptIn)
+        setReminderHour(data.reminderHour ?? 7)
+      })
+      .catch(() => {})
+  }, [])
+
+  const handleSaveReminders = async () => {
+    setSavingReminders(true)
+    try {
+      const res = await fetch("/api/settings/reminders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, whatsappOptIn, reminderHour }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || "Could not save reminder settings")
+        return
+      }
+      if (data.phone) setPhone(data.phone)
+      toast.success("Reminder settings saved")
+    } finally {
+      setSavingReminders(false)
+    }
+  }
 
   useEffect(() => {
     fetch("/api/settings/profile")
@@ -119,6 +155,48 @@ export default function SettingsPage() {
             />
           </button>
         </div>
+      </div>
+
+      <div className="glass-card p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="text-drefit-lime" /> WhatsApp reminders
+        </div>
+        <p className="text-sm text-gray-400">
+          Get a daily workout reminder and a heads-up 3 days and 1 day before your trial or subscription ends.
+        </p>
+        <input
+          type="tel"
+          placeholder="WhatsApp number, e.g. 0803 123 4567"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded p-2"
+        />
+        <label className="flex items-center gap-2 text-sm">
+          Remind me at
+          <select
+            value={reminderHour}
+            onChange={(e) => setReminderHour(Number(e.target.value))}
+            className="bg-white/5 border border-white/10 rounded p-1"
+          >
+            {Array.from({ length: 17 }, (_, i) => i + 5).map((h) => (
+              <option key={h} value={h} className="bg-drefit-dark">
+                {String(h).padStart(2, "0")}:00
+              </option>
+            ))}
+          </select>
+          (Lagos time)
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={whatsappOptIn} onChange={(e) => setWhatsappOptIn(e.target.checked)} />
+          Yes, send me reminders on WhatsApp
+        </label>
+        <button
+          onClick={handleSaveReminders}
+          disabled={savingReminders}
+          className="bg-drefit-lime text-drefit-dark px-4 py-2 rounded disabled:opacity-50"
+        >
+          {savingReminders ? "Saving..." : "Save reminders"}
+        </button>
       </div>
 
       <div className="glass-card p-4">

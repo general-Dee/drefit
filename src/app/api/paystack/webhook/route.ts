@@ -4,7 +4,9 @@ import {
   fetchVerifiedTransaction,
   isValidReference,
   verifyPaystackSignature,
+  type PaystackTransaction,
 } from "@/lib/paystack/charge"
+import { notifyPaymentFailed } from "@/lib/whatsapp/payment-failed"
 
 export async function POST(req: NextRequest) {
   // 1. Verify the HMAC-SHA512 signature over the raw body (constant-time).
@@ -18,6 +20,12 @@ export async function POST(req: NextRequest) {
     event = JSON.parse(rawBody)
   } catch {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+  }
+
+  // Failed charges never grant access; optionally nudge the member on WhatsApp.
+  if (event.event === "charge.failed" || event.event === "invoice.payment_failed") {
+    await notifyPaymentFailed(event.data as unknown as PaystackTransaction)
+    return NextResponse.json({ received: true, ignored: true })
   }
 
   // 2. Only successful charges can grant access; acknowledge everything else.

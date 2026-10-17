@@ -7,7 +7,7 @@ import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
 export default function Home() {
   const features = [
     { icon: Dumbbell, title: "Personalized Coaching", description: "Expert trainers design workouts tailored to your goals" },
-    { icon: Apple, title: "AI Diet Plans", description: "Nigerian food-focused meal plans with local recipes" },
+    { icon: Apple, title: "Coach-Designed Diet Plans", description: "Personalised Nigerian meal plans with local recipes, built by your coach" },
     { icon: Users, title: "Vibrant Community", description: "Connect with like-minded fitness enthusiasts across Nigeria" },
     { icon: TrendingUp, title: "Progress Tracking", description: "Visual analytics to keep you motivated" },
   ]
@@ -21,7 +21,7 @@ export default function Home() {
             Train Like a Champion.<br /><span className="text-drefit-lime">Eat Like One Too.</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-xl text-gray-300 mb-8">
-            Personalized coaching, AI-powered diet plans, and a community that pushes you to greatness.
+            Personalized coaching, coach-designed diet plans, and a community that pushes you to greatness.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex gap-4 justify-center">
             <Link href="/register" className="lime-gradient text-drefit-dark font-bold py-4 px-8 rounded-full hover:scale-105 transition inline-flex items-center gap-2">
@@ -59,7 +59,7 @@ export default function Home() {
             <div className="text-gray-400 mb-6">per month</div>
             <ul className="text-left space-y-2 mb-6">
               <li>✓ Personalized workout plans</li>
-              <li>✓ AI diet plans with Nigerian recipes</li>
+              <li>✓ Coach-designed meal plans with Nigerian recipes</li>
               <li>✓ 1-on-1 coaching chat</li>
               <li>✓ Progress tracking & analytics</li>
               <li>✓ Community access & challenges</li>

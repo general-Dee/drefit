@@ -3,7 +3,7 @@ import "./globals.css"
 import { Providers } from "./providers"
 export const metadata: Metadata = {
   title: "Drefit - Elite Fitness Coaching Nigeria",
-  description: "Personalized coaching, AI diet plans, and community support.",
+  description: "Personalized coaching, coach-designed diet plans, and community support.",
 }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

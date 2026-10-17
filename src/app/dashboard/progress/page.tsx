@@ -148,12 +148,18 @@ export default function ProgressPage() {
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData}>
+                <defs>
+                  <linearGradient id="weightFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#C8F135" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#C8F135" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <XAxis dataKey="day" stroke="#8B8B94" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis stroke="#8B8B94" tickLine={false} axisLine={false} fontSize={12} width={36} domain={["auto", "auto"]} />
                 <Tooltip contentStyle={{ background: "#18181B", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#F5F5F4" }} labelStyle={{ color: "#A1A1AA" }} cursor={{ stroke: "rgba(255,255,255,0.15)" }} />
-                <Area type="monotone" dataKey="weight" name="Weight (kg)" stroke="#C8F135" fill="#C8F135" fillOpacity={0.2} />
+                <Area type="monotone" dataKey="weight" name="Weight (kg)" stroke="#C8F135" strokeWidth={2} fill="url(#weightFill)" />
                 {chartData.length >= 2 && (
-                  <Line type="linear" dataKey="trend" name="Trend" stroke="#ffffff" strokeDasharray="5 5" dot={false} />
+                  <Line type="linear" dataKey="trend" name="Trend" stroke="rgba(245,245,244,0.55)" strokeDasharray="4 4" dot={false} />
                 )}
               </ComposedChart>
             </ResponsiveContainer>

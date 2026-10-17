@@ -119,20 +119,17 @@ export default function Home() {
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f, i) => (
-            <motion.div
+            <div
               key={f.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.06, ease }}
-              className="glass-card card-interactive p-6"
+              style={{ animationDelay: `${i * 60}ms` }}
+              className="glass-card card-interactive fade-up p-6"
             >
               <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-accent/10 text-accent">
                 <f.icon className="h-5 w-5" />
               </div>
               <h3 className="text-lg font-semibold">{f.title}</h3>
               <p className="mt-1.5 text-sm text-ink-muted">{f.description}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
@@ -144,12 +141,8 @@ export default function Home() {
           <h2 className="font-display text-3xl font-bold md:text-5xl">Simple, transparent pricing</h2>
           <p className="mt-3 text-ink-muted">One plan. Everything included.</p>
         </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease }}
-          className="glass-card mx-auto mt-10 max-w-md overflow-hidden p-8"
+        <div
+          className="glass-card fade-up mx-auto mt-10 max-w-md overflow-hidden p-8"
         >
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
           <div className="flex items-baseline justify-between">
@@ -174,7 +167,7 @@ export default function Home() {
             Start 7-day free trial
           </Link>
           <p className="mt-3 text-center text-xs text-ink-subtle">Cancel anytime. No commitment.</p>
-        </motion.div>
+        </div>
       </section>
 
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 border-t border-white/[0.06] px-4 py-8 text-sm text-ink-subtle md:flex-row md:px-8">

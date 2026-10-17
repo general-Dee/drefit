@@ -56,7 +56,7 @@ export default function DashboardNav({ role }: { role?: string }) {
       <nav className="sticky top-0 z-30 border-b border-white/[0.06] bg-surface-0/70 backdrop-blur-xl supports-[not(backdrop-filter:blur(1px))]:bg-surface-0">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 md:px-8">
           <Logo href="/dashboard" />
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-0.5 lg:flex">
             {links.map((link) => {
               const active = isActive(pathname, link.href)
               return (
@@ -64,7 +64,7 @@ export default function DashboardNav({ role }: { role?: string }) {
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition-colors ${
+                  className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm whitespace-nowrap transition-colors ${
                     active ? "bg-white/[0.06] text-ink" : "text-ink-muted hover:text-ink"
                   }`}
                 >
@@ -75,7 +75,7 @@ export default function DashboardNav({ role }: { role?: string }) {
             {role === "admin" && (
               <Link
                 href="/admin"
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm whitespace-nowrap transition-colors ${
                   pathname.startsWith("/admin") ? "bg-white/[0.06] text-ink" : "text-ink-muted hover:text-ink"
                 }`}
               >
@@ -84,23 +84,23 @@ export default function DashboardNav({ role }: { role?: string }) {
             )}
           </div>
           <div className="flex items-center gap-1">
-            <Link href="/dashboard/referrals" className="btn-ghost md:hidden" aria-label="Invite friends">
+            <Link href="/dashboard/referrals" className="btn-ghost lg:hidden" aria-label="Invite friends">
               <Gift className="h-4 w-4" />
             </Link>
             {role === "admin" && (
-              <Link href="/admin" className="btn-ghost md:hidden" aria-label="Admin">
+              <Link href="/admin" className="btn-ghost lg:hidden" aria-label="Admin">
                 <Shield className="h-4 w-4" />
               </Link>
             )}
-            <button onClick={() => handleSignOut()} className="btn-ghost" aria-label="Sign out">
-              <LogOut className="h-4 w-4" /> <span className="hidden lg:inline">Sign out</span>
+            <button onClick={() => handleSignOut()} className="btn-ghost whitespace-nowrap" aria-label="Sign out" title="Sign out">
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>
       </nav>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.06] bg-surface-0/80 backdrop-blur-xl supports-[not(backdrop-filter:blur(1px))]:bg-surface-0 safe-bottom md:hidden" aria-label="Primary">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.06] bg-surface-0/80 backdrop-blur-xl supports-[not(backdrop-filter:blur(1px))]:bg-surface-0 safe-bottom lg:hidden" aria-label="Primary">
         <div className="grid grid-cols-5">
           {mobileTabs.map((tab) => {
             const active = isActive(pathname, tab.href)

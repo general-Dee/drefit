@@ -1,7 +1,7 @@
-import { resend } from "./client"
+import { getResend } from "./client"
 
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: process.env.FROM_EMAIL ?? "onboarding@resend.dev",
     to,
     subject: "Reset your Drefit password",

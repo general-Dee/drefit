@@ -1,5 +1,5 @@
 import NextAuth from "next-auth"
-import { CredentialsSignin } from "@auth/core/errors"
+import { CredentialsSignin } from "next-auth"
 import Google from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare, hash } from "bcryptjs"

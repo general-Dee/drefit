@@ -5,6 +5,7 @@ import { DatabasesIndexType, OrderBy } from "node-appwrite"
 
 export const REMINDER_LOG_COLLECTION_ID = "reminderLog"
 export const REFERRALS_COLLECTION_ID = "referrals"
+export const FIRST_WEEK_PLANS_COLLECTION_ID = "firstWeekPlans"
 
 const isConflict = (err) => err?.code === 409
 
@@ -89,4 +90,21 @@ export async function ensureUpgradesSchema(databases, databaseId, log = console.
   await h.wait(F, ["referrerId", "referredId", "status", "reason", "reference", "rewardDays", "referrerRewarded", "referredRewarded", "createdAt"])
   await h.index(F, "referredId_unique", DatabasesIndexType.Unique, ["referredId"])
   await h.index(F, "referrer_status_idx", DatabasesIndexType.Key, ["referrerId", "status"])
+
+  // --- Upgrade 5: richer onboarding + first-week plan ---
+  await h.int("users", "daysPerWeek", false, 1, 7)
+  await h.str("users", "equipment", 10)
+  await h.str("users", "limitationsJson", 300)
+  await h.str("users", "limitationsNote", 300)
+  await h.wait("users", ["daysPerWeek", "equipment", "limitationsJson", "limitationsNote"])
+
+  // Plan JSON lives in its own collection (document id = user id) so the
+  // large text field doesn't count against the users row size.
+  const W = FIRST_WEEK_PLANS_COLLECTION_ID
+  await h.coll(W, "First Week Plans")
+  await h.str(W, "userId", 255, true)
+  await h.str(W, "planJson", 20000, true)
+  await h.int(W, "rulesVersion", false, 0, 1000)
+  await h.dt(W, "generatedAt", true)
+  await h.wait(W, ["userId", "planJson", "rulesVersion", "generatedAt"])
 }

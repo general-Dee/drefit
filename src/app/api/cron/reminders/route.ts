@@ -49,7 +49,9 @@ export async function GET(req: NextRequest) {
       ])
       const last = completions.documents[0] as unknown as { completedAt?: string } | undefined
       const completedToday = !!last?.completedAt && lagosDateKey(new Date(last.completedAt)) === today
-      const reminders = planReminders(user, now, { mode, completedToday, workoutName: todaysPlannedWorkoutName(user, now) })
+      const planned = await todaysPlannedWorkoutName(user, now)
+      // Planned rest days get no workout reminder (payment reminders still apply).
+      const reminders = planReminders(user, now, { mode, completedToday: completedToday || planned === null, workoutName: planned ?? undefined })
       for (const r of reminders) counts[await sendReminderOnce(user, r)] += 1
     }
     cursor = users.length === 100 ? users[users.length - 1].$id : undefined

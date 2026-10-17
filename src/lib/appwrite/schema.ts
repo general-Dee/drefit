@@ -42,6 +42,11 @@ export interface AppwriteUserDoc {
   // Referrals: this user's share code and the referrer's user $id
   referralCode?: string | null
   referredBy?: string | null
+  // Onboarding (upgrade 5)
+  daysPerWeek?: number | null
+  equipment?: "none" | "home" | "gym" | null
+  limitationsJson?: string | null
+  limitationsNote?: string | null
 }
 
 // Documents in the `progressLogs` collection.
@@ -193,4 +198,15 @@ export interface ReferralDoc {
   referrerRewarded?: boolean
   referredRewarded?: boolean
   createdAt: string
+}
+
+export const FIRST_WEEK_PLANS_COLLECTION_ID = "firstWeekPlans"
+
+// One document per user ($id = user $id) holding the generated plan.
+export interface FirstWeekPlanDoc {
+  $id: string
+  userId: string
+  planJson: string
+  rulesVersion?: number
+  generatedAt: string
 }

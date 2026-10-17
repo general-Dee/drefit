@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Flame, Calendar, Award, TrendingUp } from "lucide-react"
 import CoachWhatsAppButton from "@/components/CoachWhatsAppButton"
+import FirstWeekCard from "@/components/FirstWeekCard"
 
 export const dynamic = 'force-dynamic'
 
@@ -61,6 +62,7 @@ export default function DashboardPage() {
           <TrendingUp className="text-drefit-lime"/> Progress: {stats ? progressLabel : "—"}
         </div>
       </div>
+      <FirstWeekCard />
     </div>
   )
 }

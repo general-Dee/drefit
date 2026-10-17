@@ -10,7 +10,7 @@ import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
-import { isAdminEmail } from "@/lib/admin"
+import { isAdminEmail, resolveRole } from "@/lib/admin"
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(6) })
 
@@ -67,7 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.$id,
           email: user.email,
           name: user.name,
-          role: user.role ?? "user",
+          role: resolveRole(user.email, user.role),
           subscriptionStatus: user.subscriptionStatus ?? "inactive",
           trialEndsAt: user.trialEndsAt,
           subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
@@ -80,7 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider === "google" && token.email) {
         const dbUser = await findOrCreateGoogleUser(token.email as string, (token.name as string) ?? "Athlete")
         token.id = dbUser.$id
-        token.role = dbUser.role ?? "user"
+        token.role = resolveRole(dbUser.email, dbUser.role)
         token.subscriptionStatus = dbUser.subscriptionStatus ?? "inactive"
         token.trialEndsAt = dbUser.trialEndsAt
         token.subscriptionCurrentPeriodEnd = dbUser.subscriptionCurrentPeriodEnd
@@ -101,7 +101,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // updates and admin changes are picked up without re-login.
         const dbUser = await findUserByEmail(token.email as string)
         if (dbUser) {
-          token.role = dbUser.role ?? "user"
+          token.role = resolveRole(dbUser.email, dbUser.role)
           token.subscriptionStatus = dbUser.subscriptionStatus ?? "inactive"
           token.trialEndsAt = dbUser.trialEndsAt
           token.subscriptionCurrentPeriodEnd = dbUser.subscriptionCurrentPeriodEnd

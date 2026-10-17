@@ -7,11 +7,13 @@ import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { isAdminEmail } from "@/lib/admin"
+import { generateReferralCode, resolveReferrerId, REFERRAL_COOKIE } from "@/lib/referrals"
 
 const registerSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
+  ref: z.string().max(32).optional().nullable(),
 })
 
 export async function POST(req: NextRequest) {
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please provide a valid name, email, and password (min 6 characters)." }, { status: 400 })
   }
 
-  const { name, email, password } = parsed.data
+  const { name, email, password, ref } = parsed.data
 
   try {
     const existing = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
@@ -36,6 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 })
     }
 
+    const referredBy = await resolveReferrerId(ref ?? req.cookies.get(REFERRAL_COOKIE)?.value, email)
     const hashedPassword = await hash(password, 10)
     const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString()
 
@@ -46,6 +49,8 @@ export async function POST(req: NextRequest) {
       role: isAdminEmail(email) ? "admin" : "user",
       subscriptionStatus: "trialing",
       trialEndsAt,
+      referralCode: generateReferralCode(),
+      ...(referredBy ? { referredBy } : {}),
     })
 
     return NextResponse.json({ success: true })

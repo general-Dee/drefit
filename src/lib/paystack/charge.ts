@@ -8,6 +8,7 @@ import {
   type AppwriteUserDoc,
 } from "@/lib/appwrite/schema"
 import { PLAN_AMOUNT_KOBO, PLAN_CURRENCY, PLAN_PERIOD_DAYS } from "@/lib/paystack/plan"
+import { rewardReferralOnFirstCharge } from "@/lib/referrals"
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -143,7 +144,11 @@ export async function applyVerifiedCharge(
       periodEnd,
     })
   } catch (err) {
-    if ((err as { code?: number })?.code === 409) return { status: "duplicate" }
+    if ((err as { code?: number })?.code === 409) {
+      // Retry-safe: completes a referral reward that may have failed earlier.
+      await safeReferralReward(user.$id, tx.reference)
+      return { status: "duplicate" }
+    }
     throw err
   }
 
@@ -160,5 +165,16 @@ export async function applyVerifiedCharge(
     throw err
   }
 
+  await safeReferralReward(user.$id, tx.reference)
   return { status: "activated", userId: user.$id, periodEnd }
+}
+
+// Referral rewards must never break payment handling.
+async function safeReferralReward(userId: string, reference: string): Promise<void> {
+  try {
+    const result = await rewardReferralOnFirstCharge(userId, reference)
+    if (result !== "not_referred") console.log(`referral reward for ${userId}: ${result}`)
+  } catch (err) {
+    console.error("referral reward failed", userId, err)
+  }
 }

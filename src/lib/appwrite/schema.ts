@@ -39,6 +39,9 @@ export interface AppwriteUserDoc {
   phone?: string | null
   whatsappOptIn?: boolean | null
   reminderHour?: number | null
+  // Referrals: this user's share code and the referrer's user $id
+  referralCode?: string | null
+  referredBy?: string | null
 }
 
 // Documents in the `progressLogs` collection.
@@ -172,5 +175,22 @@ export interface ReminderLogDoc {
   type: string
   day: string
   status: "sending" | "sent"
+  createdAt: string
+}
+
+export const REFERRALS_COLLECTION_ID = "referrals"
+
+// One document per referred user ($id derived from referredId, unique index
+// on referredId), so a referral can only ever be rewarded once.
+export interface ReferralDoc {
+  $id: string
+  referrerId: string
+  referredId: string
+  status: "processing" | "rewarded" | "rejected"
+  reason?: string | null
+  reference?: string | null
+  rewardDays?: number
+  referrerRewarded?: boolean
+  referredRewarded?: boolean
   createdAt: string
 }

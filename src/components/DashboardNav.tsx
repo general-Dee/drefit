@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LayoutDashboard, Dumbbell, Apple, TrendingUp, Users, MessageCircle, Settings, Shield, LogOut } from "lucide-react"
+import { LayoutDashboard, Dumbbell, Apple, TrendingUp, Users, MessageCircle, Settings, Shield, LogOut, Gift } from "lucide-react"
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const links = [
   { href: "/dashboard/progress", label: "Progress", icon: TrendingUp },
   { href: "/dashboard/community", label: "Community", icon: Users },
   { href: "/dashboard/coaching", label: "Coaching", icon: MessageCircle },
+  { href: "/dashboard/referrals", label: "Invite", icon: Gift },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 

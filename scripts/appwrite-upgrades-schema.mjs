@@ -67,4 +67,26 @@ export async function ensureUpgradesSchema(databases, databaseId, log = console.
   await h.dt(R, "createdAt", true)
   await h.wait(R, ["userId", "type", "day", "status", "createdAt"])
   await h.index(R, "user_type_day_unique", DatabasesIndexType.Unique, ["userId", "type", "day"])
+
+  // --- Upgrade 3: referrals ---
+  await h.str("users", "referralCode", 16)
+  await h.str("users", "referredBy", 255)
+  await h.wait("users", ["referralCode", "referredBy"])
+  await h.index("users", "referralCode_unique", DatabasesIndexType.Unique, ["referralCode"])
+  await h.index("users", "referredBy_idx", DatabasesIndexType.Key, ["referredBy"])
+
+  const F = REFERRALS_COLLECTION_ID
+  await h.coll(F, "Referrals")
+  await h.str(F, "referrerId", 255, true)
+  await h.str(F, "referredId", 255, true)
+  await h.str(F, "status", 20, true)
+  await h.str(F, "reason", 100)
+  await h.str(F, "reference", 255)
+  await h.int(F, "rewardDays", false, 0, 365)
+  await h.bool(F, "referrerRewarded", false, false)
+  await h.bool(F, "referredRewarded", false, false)
+  await h.dt(F, "createdAt", true)
+  await h.wait(F, ["referrerId", "referredId", "status", "reason", "reference", "rewardDays", "referrerRewarded", "referredRewarded", "createdAt"])
+  await h.index(F, "referredId_unique", DatabasesIndexType.Unique, ["referredId"])
+  await h.index(F, "referrer_status_idx", DatabasesIndexType.Key, ["referrerId", "status"])
 }

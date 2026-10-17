@@ -19,6 +19,15 @@ try {
   await ensureSecuritySchema(new Databases(client), databaseId, (m) => console.log(`[migrate-appwrite]${m}`))
   console.log("[migrate-appwrite] Done.")
 } catch (err) {
-  console.error(`[migrate-appwrite] FAILED: ${err?.message ?? err}`)
-  process.exit(1)
+  // Don't block deploys on an unreachable/paused Appwrite project: the code
+  // paths that depend on these collections fail safe until they exist
+  // (payments are not granted without an idempotency record; login falls back
+  // to the in-memory limiter). Set MIGRATE_STRICT=1 to make this fatal.
+  const msg = err?.message ?? String(err)
+  if (process.env.MIGRATE_STRICT === "1") {
+    console.error(`[migrate-appwrite] FAILED: ${msg}`)
+    process.exit(1)
+  }
+  console.warn(`[migrate-appwrite] WARNING: schema migration skipped: ${msg}`)
+  console.warn("[migrate-appwrite] Re-run once Appwrite is reachable (redeploy, or node --env-file=.env.local scripts/migrate-appwrite.mjs).")
 }

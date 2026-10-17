@@ -9,7 +9,7 @@ import { z } from "zod"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
-import { getClientIp } from "@/lib/rate-limit"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { isLoginLocked, recordLoginFailure, clearLoginFailures } from "@/lib/login-throttle"
 import { isAdminEmail, resolveRole } from "@/lib/admin"
 
@@ -65,7 +65,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const { email, password } = parsed.data
         // Persistent lockout (Appwrite-backed). Applied identically whether or
         // not the account exists, so it can't be used to enumerate emails.
-        if (await isLoginLocked(ip, email)) {
+        // The in-memory limiter is kept as a per-instance backstop in case the
+        // Appwrite-backed store is unavailable (it fails open).
+        if (!rateLimit(`login:${ip}:${email.trim().toLowerCase()}`, 10, 60_000).success || (await isLoginLocked(ip, email))) {
           throw new RateLimitedSignin()
         }
 

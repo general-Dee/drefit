@@ -7,6 +7,8 @@ import AuthShell from "@/components/ui/AuthShell"
 import { Mail, Lock } from "lucide-react"
 import toast from "react-hot-toast"
 
+import Spinner from "@/components/ui/Spinner"
+
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
@@ -54,7 +56,7 @@ export default function LoginPage() {
           <Link href="/forgot-password" className="text-sm text-accent">Forgot password?</Link>
         </div>
         <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? <><Spinner /> Signing in</> : "Sign in"}
         </button>
       </form>
       <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-widest text-ink-subtle">

@@ -8,6 +8,8 @@ import Logo from "@/components/ui/Logo"
 import toast from "react-hot-toast"
 import type { FirstWeekPlan } from "@/lib/first-week-plan"
 
+import Spinner from "@/components/ui/Spinner"
+
 export const dynamic = "force-dynamic"
 
 type Answers = {
@@ -239,7 +241,7 @@ export default function OnboardingPage() {
             <div className="mt-auto pt-8">
               {current.multi && (
                 <button onClick={() => next(answers)} disabled={saving} className="btn-primary w-full py-4 text-base">
-                  {saving ? "Building your first week…" : answers.limitations.length ? "Continue" : "None — continue"}
+                  {saving ? <><Spinner /> Building your first week…</> : answers.limitations.length ? "Continue" : "None — continue"}
                 </button>
               )}
               {!current.multi && saving && <p className="text-center text-sm text-ink-muted">Building your first week…</p>}

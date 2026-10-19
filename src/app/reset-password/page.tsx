@@ -5,6 +5,8 @@ import { Lock } from "lucide-react"
 import toast from "react-hot-toast"
 import Logo from "@/components/ui/Logo"
 
+import Spinner from "@/components/ui/Spinner"
+
 export const dynamic = 'force-dynamic'
 
 export default function ResetPasswordPage() {
@@ -78,7 +80,7 @@ function ResetPasswordForm() {
             <input type="password" placeholder="Confirm Password" className="input-field pl-10" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required minLength={6} />
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-            {loading ? "Resetting..." : "Reset Password"}
+            {loading ? <><Spinner /> Resetting</> : "Reset password"}
           </button>
         </form>
       </div>

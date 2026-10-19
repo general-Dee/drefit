@@ -1,5 +1,8 @@
 import Link from "next/link"
-import { Users, DollarSign, Dumbbell, ChevronRight } from "lucide-react"
+import { Users, Wallet, Dumbbell, ChevronRight, Salad, MessagesSquare } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import StatCard from "@/components/ui/StatCard"
+import CountUp from "@/components/ui/CountUp"
 import { Query } from "node-appwrite"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, USERS_COLLECTION_ID, WORKOUTS_COLLECTION_ID, DIET_PLANS_COLLECTION_ID } from "@/lib/appwrite/schema"
@@ -21,45 +24,34 @@ export default async function AdminPage() {
   // Current active-subscriber count x price, not true recurring MRR (no proration/tiers).
   const mrr = activeSubscribers.total * PLAN_PRICE_NGN
 
+  const tiles = [
+    { href: "/admin/workouts", icon: Dumbbell, title: "Manage workouts", sub: `${totalWorkouts.total.toLocaleString()} in library` },
+    { href: "/admin/diet", icon: Salad, title: "Manage diet plans", sub: `${totalDietPlans.total.toLocaleString()} plan days` },
+    { href: "/admin/coaching", icon: MessagesSquare, title: "Coaching messages", sub: "Reply to member conversations" },
+  ]
+
   return (
-    <div className="page-shell space-y-6">
-      <h1 className="fade-up font-bold">Admin Dashboard</h1>
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="glass-card p-4"><div className="flex items-center gap-2 text-xs font-medium text-ink-muted"><span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><Users className="h-4 w-4"/></span>Total users</div><div className="stat-value mt-3">{totalUsers.total.toLocaleString()}</div></div>
-        <div className="glass-card p-4"><div className="flex items-center gap-2 text-xs font-medium text-ink-muted"><span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><DollarSign className="h-4 w-4"/></span>MRR</div><div className="stat-value mt-3">₦{mrr.toLocaleString()}</div></div>
-        <div className="glass-card p-4"><div className="flex items-center gap-2 text-xs font-medium text-ink-muted"><span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><Dumbbell className="h-4 w-4"/></span>Workouts in library</div><div className="stat-value mt-3">{totalWorkouts.total.toLocaleString()}</div></div>
+    <div className="page-shell">
+      <PageHeader eyebrow="Admin" title="Coach console" subtitle="Members, revenue and your content library at a glance." />
+      <div className="stagger grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+        <StatCard icon={Users} label="Total users"><CountUp value={totalUsers.total} /></StatCard>
+        <StatCard icon={Wallet} label="Monthly revenue" hint={`${activeSubscribers.total.toLocaleString()} active × ₦${PLAN_PRICE_NGN.toLocaleString()}`}>
+          <CountUp value={mrr} prefix="₦" />
+        </StatCard>
+        <StatCard icon={Dumbbell} label="Workouts in library"><CountUp value={totalWorkouts.total} /></StatCard>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <Link
-          href="/admin/workouts"
-          className="glass-card card-interactive p-4 flex items-center justify-between"
-        >
-          <div>
-            <h2 className="text-xl mb-1">Manage Workouts</h2>
-            <p className="text-sm text-ink-muted">{totalWorkouts.total.toLocaleString()} in library</p>
-          </div>
-          <ChevronRight className="text-drefit-lime" />
-        </Link>
-        <Link
-          href="/admin/diet"
-          className="glass-card card-interactive p-4 flex items-center justify-between"
-        >
-          <div>
-            <h2 className="text-xl mb-1">Manage Diet Plans</h2>
-            <p className="text-sm text-ink-muted">{totalDietPlans.total.toLocaleString()} plan days</p>
-          </div>
-          <ChevronRight className="text-drefit-lime" />
-        </Link>
-        <Link
-          href="/admin/coaching"
-          className="glass-card card-interactive p-4 flex items-center justify-between"
-        >
-          <div>
-            <h2 className="text-xl mb-1">Coaching Messages</h2>
-            <p className="text-sm text-ink-muted">Reply to member conversations</p>
-          </div>
-          <ChevronRight className="text-drefit-lime" />
-        </Link>
+      <h2 className="label-caps mb-3 mt-8">Manage</h2>
+      <div className="stagger grid gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+        {tiles.map((t) => (
+          <Link key={t.href} href={t.href} className="group glass-card card-interactive flex items-center gap-4 p-4 sm:p-5">
+            <span className="icon-tile h-11 w-11"><t.icon className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate">{t.title}</h3>
+              <p className="truncate text-sm text-ink-muted">{t.sub}</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-ink-subtle transition-transform duration-base ease-out group-hover:translate-x-0.5 group-hover:text-accent" />
+          </Link>
+        ))}
       </div>
     </div>
   )

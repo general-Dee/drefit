@@ -33,8 +33,8 @@ export default function OfflineBanner() {
 
   if (online && pending === 0) return null
   return (
-    <div role="status" className="sticky top-0 z-20 flex items-center justify-center gap-2 bg-amber-400 px-4 py-2 text-sm font-medium text-black">
-      {online ? <RefreshCw className="h-4 w-4 animate-spin" /> : <WifiOff className="h-4 w-4" />}
+    <div role="status" className="sticky top-0 z-40 flex items-center justify-center gap-2 border-b border-accent/20 bg-surface-3 px-4 py-2 text-[13px] font-medium text-ink">
+      {online ? <RefreshCw className="h-4 w-4 animate-spin text-accent" /> : <WifiOff className="h-4 w-4 text-accent" />}
       {online
         ? `Syncing ${pending} workout${pending === 1 ? "" : "s"} completed offline…`
         : `You're offline — showing saved workouts.${pending ? ` ${pending} completion${pending === 1 ? "" : "s"} will sync later.` : ""}`}

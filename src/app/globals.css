@@ -6,13 +6,25 @@
 :root {
   --bg: #0a0a0b;
   --surface-1: #111113;
-  --surface-2: #18181b;
+  --surface-2: #17171a;
+  --surface-3: #1f1f23;
   --ink: #f5f5f4;
   --muted: #a1a1aa;
   --accent: #c8f135;
   --accent-ink: #0a0a0b;
-  --hairline: rgba(255, 255, 255, 0.08);
-  --glass: rgba(24, 24, 27, 0.55);
+  --accent-grad: linear-gradient(135deg, #ddfb72 0%, #c8f135 45%, #b1e01f 100%);
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-strong: rgba(255, 255, 255, 0.12);
+  --glass: rgba(23, 23, 26, 0.62);
+  --glass-blur: 8px;
+  /* Motion tokens */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  /* Focus ring */
+  --ring: 0 0 0 2px var(--bg), 0 0 0 4px rgba(200, 241, 53, 0.9), 0 0 18px 2px rgba(200, 241, 53, 0.35);
   color-scheme: dark;
 }
 
@@ -21,8 +33,9 @@
   body {
     @apply bg-surface-0 text-ink font-body antialiased;
     font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
   }
-  /* Ambient light lives on a fixed layer (cheaper than background-attachment: fixed on mobile). */
+  /* Ambient light lives on one fixed layer (cheaper than background-attachment: fixed). */
   body::before {
     content: "";
     position: fixed;
@@ -31,66 +44,111 @@
     pointer-events: none;
     background:
       radial-gradient(1200px 600px at 85% -10%, rgba(200, 241, 53, 0.07), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, rgba(255, 255, 255, 0.04), transparent 60%);
+      radial-gradient(900px 500px at -10% 110%, rgba(255, 255, 255, 0.035), transparent 60%);
   }
   input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color: var(--accent); }
-  h1, h2, h3, h4, h5, h6 { @apply font-display font-semibold tracking-tight text-ink; }
-  h1 { @apply text-3xl md:text-4xl; }
-  h2 { @apply text-xl md:text-2xl; }
+
+  /* Type: tight display tracking, balanced wraps */
+  h1, h2, h3, h4, h5, h6 { @apply font-display text-ink; text-wrap: balance; }
+  h1 { @apply text-[1.75rem] leading-[2.125rem] font-bold tracking-[-0.025em] md:text-[2.25rem] md:leading-[2.625rem]; }
+  h2 { @apply text-lg leading-6 font-semibold tracking-[-0.015em] md:text-xl md:leading-7; }
+  h3 { @apply text-base leading-6 font-semibold tracking-[-0.01em]; }
+  p { text-wrap: pretty; }
   ::selection { background: rgba(200, 241, 53, 0.35); color: #fff; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-  input, select, textarea { color-scheme: dark; }
+
+  :focus-visible { outline: none; box-shadow: var(--ring); border-radius: 10px; }
+
+  /* One stroke weight for every lucide icon */
+  svg.lucide { stroke-width: 1.75; flex-shrink: 0; }
+  svg.lucide.icon-strong { stroke-width: 2.5; }
 }
 
 @layer components {
-  /* Glass card: translucent layer + blur + hairline + inner glow. */
+  /* ---------- Surfaces ---------- */
+  /* Glass card: translucent layer + light blur + hairline + inner glow. */
   .glass-card {
     @apply relative rounded-2xl border shadow-card;
     background: var(--glass);
     border-color: var(--hairline);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    backdrop-filter: blur(14px) saturate(140%);
-    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease, opacity 220ms ease;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base) ease, opacity var(--dur-base) ease;
   }
-  /* Solid fallback where backdrop-filter is unsupported (text stays readable). */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass-card { background: var(--surface-1); }
-  }
-  a.glass-card:hover, button.glass-card:hover, .card-interactive:hover {
+  .surface { @apply relative rounded-2xl border bg-surface-1 shadow-elev-1; border-color: var(--hairline); }
+  .surface-2 { @apply relative rounded-xl border bg-surface-2; border-color: var(--hairline); }
+
+  a.glass-card:hover, button.glass-card:not(:disabled):hover, .card-interactive:hover {
     transform: translateY(-2px);
     border-color: rgba(200, 241, 53, 0.35);
   }
-  a.glass-card:active, button.glass-card:active, .card-interactive:active { transform: scale(0.985); }
+  a.glass-card:active, button.glass-card:not(:disabled):active, .card-interactive:active { transform: scale(0.985); }
 
-  .surface { @apply rounded-2xl border bg-surface-1; border-color: var(--hairline); }
-
-  .lime-gradient { @apply bg-accent text-accent-ink; }
-
+  /* ---------- Buttons ---------- */
+  .lime-gradient { background-image: var(--accent-grad); @apply text-accent-ink; }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold select-none disabled:opacity-50 disabled:pointer-events-none;
-    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), background-color 160ms ease, opacity 160ms ease;
+    @apply relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold tracking-[-0.005em] select-none whitespace-nowrap disabled:opacity-50 disabled:pointer-events-none;
+    transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-base) ease, box-shadow var(--dur-base) ease, opacity var(--dur-base) ease, color var(--dur-base) ease;
   }
   .btn:active { transform: scale(0.97); }
-  .btn-primary { @apply btn bg-accent text-accent-ink hover:bg-accent-hover; }
-  .btn-secondary { @apply btn border text-ink hover:bg-white/5; border-color: rgba(255, 255, 255, 0.14); }
-  .btn-ghost { @apply btn px-3 py-2 text-ink-muted hover:text-ink hover:bg-white/5; }
-  .btn-danger { @apply btn text-red-300 hover:bg-red-500/10; }
-
-  .input-field {
-    @apply w-full rounded-xl border bg-white/[0.04] px-3.5 py-3 text-ink placeholder:text-ink-subtle outline-none;
-    border-color: rgba(255, 255, 255, 0.1);
-    transition: border-color 160ms ease, background-color 160ms ease;
+  .btn-primary {
+    @apply btn text-accent-ink;
+    background-image: var(--accent-grad);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -10px rgba(200, 241, 53, 0.55);
   }
-  .input-field:focus { border-color: var(--accent); background-color: rgba(255, 255, 255, 0.06); }
+  .btn-primary:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 0 1px rgba(200, 241, 53, 0.5), 0 10px 32px -8px rgba(200, 241, 53, 0.6); }
+  .btn-primary:focus-visible { box-shadow: var(--ring); }
+  .btn-secondary { @apply btn border bg-white/[0.03] text-ink hover:bg-white/[0.07]; border-color: var(--hairline-strong); }
+  .btn-ghost { @apply btn min-h-[40px] px-3 py-2 text-ink-muted hover:text-ink hover:bg-white/[0.06]; }
+  .btn-danger { @apply btn text-red-300 hover:bg-red-500/10; }
+  .btn-sm { @apply min-h-[36px] rounded-lg px-3.5 py-2 text-[13px]; }
+  .btn-lg { @apply min-h-[52px] px-7 py-4 text-base; }
+  .icon-btn { @apply btn min-h-[40px] w-10 px-0 py-0 text-ink-muted hover:text-ink hover:bg-white/[0.06]; }
 
-  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-accent; }
-  .stat-value { @apply font-display text-2xl font-semibold tabular-nums tracking-tight; }
+  /* ---------- Forms ---------- */
+  .input-field {
+    @apply w-full min-h-[44px] rounded-xl border bg-white/[0.035] px-3.5 py-3 text-[15px] text-ink placeholder:text-ink-subtle outline-none;
+    border-color: rgba(255, 255, 255, 0.1);
+    transition: border-color var(--dur-base) ease, background-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
+  }
+  .input-field:hover { border-color: rgba(255, 255, 255, 0.16); }
+  .input-field:focus, .input-field:focus-visible {
+    border-color: rgba(200, 241, 53, 0.7);
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(200, 241, 53, 0.12);
+    border-radius: 0.875rem;
+  }
+  .field-label { @apply mb-1.5 block text-[13px] font-medium text-ink-muted; }
+  .field-hint { @apply mt-1.5 text-xs text-ink-subtle; }
+
+  /* ---------- Type helpers ---------- */
+  .eyebrow { @apply text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-accent; }
+  .label-caps { @apply text-[11px] font-semibold uppercase leading-4 tracking-[0.14em] text-ink-subtle; }
+  .stat-value { @apply font-display text-[1.625rem] font-semibold leading-8 tabular-nums tracking-[-0.03em]; }
+  .stat-unit { @apply ml-1 font-body text-sm font-medium tracking-normal text-ink-muted; }
+  .stat-label { @apply text-xs font-medium text-ink-muted; }
   .muted { @apply text-ink-muted; }
-  .chip { @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs text-ink-muted; border-color: var(--hairline); }
+  .chip { @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium text-ink-muted; border-color: var(--hairline); }
+  .chip-accent { @apply chip border-accent/30 bg-accent/10 text-accent; }
+  .section-title { @apply mb-3 flex items-center justify-between gap-3; }
 
-  .page-shell { @apply mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-10 pb-28 lg:pb-10; }
+  /* ---------- Layout ---------- */
+  .page-shell { @apply mx-auto w-full max-w-6xl px-4 pt-6 pb-28 sm:px-6 md:pt-10 lg:px-8 lg:pb-12; }
   .section-padding { @apply px-4 md:px-8 lg:px-16 py-16 md:py-24; }
+  .divider { @apply h-px w-full bg-white/[0.07]; }
 
+  /* Icon tile used on stat cards, settings rows and empty states */
+  .icon-tile { @apply grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/15; }
+  .icon-tile-muted { @apply grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/[0.05] text-ink-muted ring-1 ring-inset ring-white/[0.06]; }
+
+  /* Progress track: fill animates via transform: scaleX only */
+  .progress-track { @apply relative h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]; }
+  .progress-fill {
+    @apply absolute inset-0 origin-left rounded-full;
+    background-image: var(--accent-grad);
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  /* ---------- Loading ---------- */
   .skeleton { @apply relative overflow-hidden rounded-xl bg-white/[0.05]; }
   .skeleton::after {
     content: "";
@@ -98,19 +156,42 @@
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
   }
 
+  /* ---------- Entrances ---------- */
   .fade-up { @apply animate-fade-up; }
   .stagger > * { @apply animate-fade-up; }
-  .stagger > *:nth-child(2) { animation-delay: 60ms; }
-  .stagger > *:nth-child(3) { animation-delay: 120ms; }
-  .stagger > *:nth-child(4) { animation-delay: 180ms; }
-  .stagger > *:nth-child(5) { animation-delay: 240ms; }
-  .stagger > *:nth-child(n + 6) { animation-delay: 300ms; }
+  .stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger > *:nth-child(n + 6) { animation-delay: 250ms; }
+
+  /* Bars (top nav / tab bar): solid by default, blur only on large screens */
+  .bar { background: rgba(10, 10, 11, 0.94); border-color: var(--hairline); }
 }
 
 @layer utilities {
   .tabular { font-variant-numeric: tabular-nums; }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .pressable { transition: transform var(--dur-fast) var(--ease-out); }
+  .pressable:active { transform: scale(0.97); }
+  .bar-blur { background: rgba(10, 10, 11, 0.72); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 }
+
+/* ---------- Performance tiers ----------
+   Phones, users who ask for less transparency, and low-power devices
+   (html.perf-lite, set by an inline check in layout.tsx) get solid surfaces
+   instead of backdrop-filter. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-card { background: var(--surface-2); }
+}
+@media (max-width: 640px), (prefers-reduced-transparency: reduce) {
+  .glass-card, .bar-blur { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass-card { background: var(--surface-2); }
+  .bar-blur { background: rgba(10, 10, 11, 0.96); }
+}
+html.perf-lite .glass-card, html.perf-lite .bar-blur { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.perf-lite .glass-card { background: var(--surface-2); }
+html.perf-lite .bar-blur { background: rgba(10, 10, 11, 0.96); }
 
 /* Respect reduced-motion: no movement, instant state changes. */
 @media (prefers-reduced-motion: reduce) {

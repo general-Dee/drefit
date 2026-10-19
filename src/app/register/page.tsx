@@ -6,6 +6,8 @@ import toast from "react-hot-toast"
 import Link from "next/link"
 import AuthShell from "@/components/ui/AuthShell"
 
+import Spinner from "@/components/ui/Spinner"
+
 export const dynamic = 'force-dynamic'
 
 export default function RegisterPage() {
@@ -78,7 +80,7 @@ export default function RegisterPage() {
         <input type="text" autoComplete="name" aria-label="Full name" placeholder="Full name" className="input-field" value={name} onChange={e=>setName(e.target.value)} required />
         <input type="email" autoComplete="email" aria-label="Email" placeholder="Email" className="input-field" value={email} onChange={e=>setEmail(e.target.value)} required />
         <input type="password" autoComplete="new-password" aria-label="Password" placeholder="Password" className="input-field" value={password} onChange={e=>setPassword(e.target.value)} required />
-        <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">{loading ? "Creating account..." : "Create account"}</button>
+        <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">{loading ? <><Spinner /> Creating account</> : "Create account"}</button>
       </form>
     </AuthShell>
   )

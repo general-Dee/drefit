@@ -63,10 +63,10 @@ export default function Home() {
             Personalised coaching, coach-designed Nigerian meal plans and a community that keeps you showing up.
           </motion.p>
           <motion.div {...rise(0.25)} className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-            <Link href="/register" className="btn-primary px-7 py-4 text-base shadow-glow">
+            <Link href="/register" className="btn-primary btn-lg">
               Start your journey <ArrowRight className="h-5 w-5" />
             </Link>
-            <Link href="#pricing" className="btn-secondary px-7 py-4 text-base">
+            <Link href="#pricing" className="btn-secondary btn-lg">
               View pricing
             </Link>
           </motion.div>
@@ -163,7 +163,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <Link href="/register" className="btn-primary mt-8 w-full py-4 text-base">
+          <Link href="/register" className="btn-primary btn-lg mt-8 w-full">
             Start 7-day free trial
           </Link>
           <p className="mt-3 text-center text-xs text-ink-subtle">Cancel anytime. No commitment.</p>

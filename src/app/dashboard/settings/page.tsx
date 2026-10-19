@@ -2,7 +2,11 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Bell, User, CreditCard, MessageCircle } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import { AlertTriangle, Bell, CalendarClock, Clock, User, CreditCard, MessageCircle, Phone, type LucideIcon } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import Spinner from "@/components/ui/Spinner"
+import { reveal } from "@/components/ui/motion"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
@@ -118,121 +122,147 @@ export default function SettingsPage() {
   const status = session?.user?.subscriptionStatus
 
   return (
-    <div className="page-shell max-w-2xl space-y-6">
-      <h1 className="fade-up font-bold">Settings</h1>
+    <div className="page-shell max-w-2xl">
+      <PageHeader eyebrow="Account" title="Settings" subtitle="Profile, reminders and your plan." />
 
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <User className="text-drefit-lime" /> Profile
-        </div>
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          disabled={loadingProfile}
-          className="input-field mb-2 disabled:opacity-50"
-        />
-        <button
-          onClick={handleSaveProfile}
-          disabled={savingProfile || loadingProfile}
-          className="btn-primary"
-        >
-          {savingProfile ? "Saving..." : "Save"}
-        </button>
-      </div>
-
-      <div className="glass-card p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bell className="text-drefit-lime" /> Notifications
-          </div>
-          <button
-            onClick={handleToggleNotifications}
-            className={`w-12 h-6 rounded-full transition ${notifications ? "bg-drefit-lime" : "bg-white/20"}`}
-          >
-            <div
-              className={`w-5 h-5 bg-white rounded-full transform transition ${notifications ? "translate-x-6" : "translate-x-1"}`}
+      <div className="stagger space-y-4">
+        <Section icon={User} title="Profile" description="How you appear to your coach and the community.">
+          <label className="block">
+            <span className="field-label">Display name</span>
+            <input
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loadingProfile}
+              className="input-field disabled:opacity-50"
             />
-          </button>
-        </div>
-      </div>
-
-      <div className="glass-card p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="text-drefit-lime" /> WhatsApp reminders
-        </div>
-        <p className="text-sm text-ink-muted">
-          Get a daily workout reminder and a heads-up 3 days and 1 day before your trial or subscription ends.
-        </p>
-        <input
-          type="tel"
-          placeholder="WhatsApp number, e.g. 0816 551 0842"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="input-field"
-        />
-        <label className="flex items-center gap-2 text-sm">
-          Remind me at
-          <select
-            value={reminderHour}
-            onChange={(e) => setReminderHour(Number(e.target.value))}
-            className="input-field w-auto px-2 py-1.5"
-          >
-            {Array.from({ length: 17 }, (_, i) => i + 5).map((h) => (
-              <option key={h} value={h} className="bg-drefit-dark">
-                {String(h).padStart(2, "0")}:00
-              </option>
-            ))}
-          </select>
-          (Lagos time)
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={whatsappOptIn} onChange={(e) => setWhatsappOptIn(e.target.checked)} />
-          Yes, send me reminders on WhatsApp
-        </label>
-        <button
-          onClick={handleSaveReminders}
-          disabled={savingReminders}
-          className="btn-primary"
-        >
-          {savingReminders ? "Saving..." : "Save reminders"}
-        </button>
-      </div>
-
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <CreditCard className="text-drefit-lime" /> Subscription
-        </div>
-        <p className="text-drefit-lime text-xl">₦{PLAN_PRICE_NGN.toLocaleString()}/month</p>
-        {status === "active" && periodEnd && (
-          <p className="text-ink-muted text-sm mt-1">Renews {format(new Date(periodEnd), "MMM d, yyyy")}</p>
-        )}
-        {status === "trialing" && session?.user?.trialEndsAt && (
-          <p className="text-ink-muted text-sm mt-1">
-            Trial ends {format(new Date(session.user.trialEndsAt), "MMM d, yyyy")}
-          </p>
-        )}
-
-        {!confirmingCancel ? (
-          <button onClick={() => setConfirmingCancel(true)} className="mt-2 text-red-400">
-            Cancel
-          </button>
-        ) : (
-          <div className="mt-2 flex items-center gap-3">
-            <span className="text-sm text-ink-muted">Are you sure?</span>
-            <button
-              onClick={handleCancelSubscription}
-              disabled={cancelling}
-              className="btn-danger"
-            >
-              {cancelling ? "Cancelling..." : "Yes, cancel"}
-            </button>
-            <button onClick={() => setConfirmingCancel(false)} className="text-ink-muted">
-              Never mind
+          </label>
+          <div className="mt-4 flex justify-end">
+            <button onClick={handleSaveProfile} disabled={savingProfile || loadingProfile} className="btn-secondary w-[120px]">
+              {savingProfile ? <Spinner /> : null} {savingProfile ? "Saving" : "Save"}
             </button>
           </div>
-        )}
+        </Section>
+
+        <section className="glass-card p-4 sm:p-5">
+          <div className="flex items-center gap-4">
+            <span className="icon-tile"><Bell className="h-[18px] w-[18px]" /></span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base">Notifications</h2>
+              <p className="text-sm text-ink-muted">Updates from Drefit and your coach.</p>
+            </div>
+            <button
+              onClick={handleToggleNotifications}
+              role="switch"
+              aria-checked={notifications}
+              aria-label="Notifications"
+              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-base ${notifications ? "lime-gradient shadow-glow" : "bg-white/15"}`}
+            >
+              <span
+                className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-elev-1 transition-transform duration-base ease-out ${notifications ? "translate-x-5" : "translate-x-0"}`}
+              />
+            </button>
+          </div>
+        </section>
+
+        <Section icon={MessageCircle} title="WhatsApp reminders" description="A daily workout nudge, plus a heads-up 3 days and 1 day before your trial or subscription ends.">
+          <div className="space-y-4">
+            <label className="block">
+              <span className="field-label">WhatsApp number</span>
+              <div className="relative">
+                <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-subtle" />
+                <input
+                  type="tel"
+                  placeholder="WhatsApp number, e.g. 0816 551 0842"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="input-field pl-10 tabular-nums"
+                />
+              </div>
+            </label>
+            <label className="flex items-center justify-between gap-3 rounded-xl border border-line bg-white/[0.02] px-3.5 py-2.5">
+              <span className="flex items-center gap-2.5 text-sm"><Clock className="h-4 w-4 text-ink-subtle" /> Remind me at <span className="text-ink-subtle">(Lagos time)</span></span>
+              <select
+                value={reminderHour}
+                onChange={(e) => setReminderHour(Number(e.target.value))}
+                className="input-field min-h-[36px] w-auto py-1.5 pl-3 pr-8 text-sm tabular-nums"
+              >
+                {Array.from({ length: 17 }, (_, i) => i + 5).map((h) => (
+                  <option key={h} value={h} className="bg-surface-2">
+                    {String(h).padStart(2, "0")}:00
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex cursor-pointer items-start gap-3 text-sm">
+              <input type="checkbox" className="mt-0.5 h-4 w-4" checked={whatsappOptIn} onChange={(e) => setWhatsappOptIn(e.target.checked)} />
+              <span>Yes, send me reminders on WhatsApp</span>
+            </label>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <button onClick={handleSaveReminders} disabled={savingReminders} className="btn-primary w-[168px]">
+              {savingReminders ? <Spinner /> : null} {savingReminders ? "Saving" : "Save reminders"}
+            </button>
+          </div>
+        </Section>
+
+        <Section icon={CreditCard} title="Subscription">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-display text-2xl font-bold tabular-nums tracking-tight">₦{PLAN_PRICE_NGN.toLocaleString()}</span>
+                <span className="text-sm text-ink-muted">/ month</span>
+              </div>
+              {status === "active" && periodEnd && (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted"><CalendarClock className="h-4 w-4" /> Renews {format(new Date(periodEnd), "MMM d, yyyy")}</p>
+              )}
+              {status === "trialing" && session?.user?.trialEndsAt && (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted">
+                  <CalendarClock className="h-4 w-4" /> Trial ends {format(new Date(session.user.trialEndsAt), "MMM d, yyyy")}
+                </p>
+              )}
+            </div>
+            <span className="chip-accent capitalize">{status === "trialing" ? "Free trial" : status ?? "—"}</span>
+          </div>
+
+          <div className="divider my-4" />
+          <AnimatePresence mode="wait" initial={false}>
+            {!confirmingCancel ? (
+              <motion.div key="idle" {...reveal}>
+                <button onClick={() => setConfirmingCancel(true)} className="btn-danger btn-sm -ml-3">
+                  Cancel subscription
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div key="confirm" {...reveal} className="flex flex-wrap items-center gap-3 rounded-xl border border-red-400/20 bg-red-500/[0.06] p-3">
+                <AlertTriangle className="h-4 w-4 text-red-300" />
+                <span className="flex-1 text-sm">Are you sure you want to cancel?</span>
+                <button onClick={() => setConfirmingCancel(false)} className="btn-ghost btn-sm">
+                  Never mind
+                </button>
+                <button onClick={handleCancelSubscription} disabled={cancelling} className="btn-danger btn-sm w-[120px] border border-red-400/30">
+                  {cancelling ? <Spinner /> : null} {cancelling ? "Cancelling" : "Yes, cancel"}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Section>
       </div>
     </div>
+  )
+}
+
+function Section({ icon: Icon, title, description, children }: { icon: LucideIcon; title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <section className="glass-card p-4 sm:p-5">
+      <div className="mb-4 flex items-start gap-4">
+        <span className="icon-tile"><Icon className="h-[18px] w-[18px]" /></span>
+        <div className="min-w-0">
+          <h2 className="text-base">{title}</h2>
+          {description && <p className="text-sm text-ink-muted">{description}</p>}
+        </div>
+      </div>
+      {children}
+    </section>
   )
 }

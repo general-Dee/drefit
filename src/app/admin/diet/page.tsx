@@ -1,7 +1,11 @@
 "use client"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Plus } from "lucide-react"
+import { Plus, Salad, Pencil, Trash2 } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import EmptyState from "@/components/ui/EmptyState"
+import Spinner from "@/components/ui/Spinner"
+import { ListRowsSkeleton } from "@/components/ui/skeletons"
 import toast from "react-hot-toast"
 import type { DietPlanDoc } from "@/lib/appwrite/schema"
 
@@ -44,65 +48,67 @@ export default function AdminDietPage() {
   }, {})
 
   return (
-    <div className="page-shell max-w-4xl space-y-6">
-      <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
-        <ArrowLeft className="w-4 h-4" /> Back to Admin
-      </Link>
-      <div className="flex items-center justify-between">
-        <h1 className="fade-up font-bold">Manage Diet Plans</h1>
-        <Link href="/admin/diet/new" className="btn-primary px-4 py-2.5">
-          <Plus className="w-4 h-4" /> New Plan
-        </Link>
-      </div>
+    <div className="page-shell max-w-4xl">
+      <PageHeader
+        back={{ href: "/admin", label: "Admin" }}
+        title="Diet plans"
+        subtitle="One plan per day for each dietary preference."
+        action={
+          <Link href="/admin/diet/new" className="btn-primary">
+            <Plus className="h-4 w-4" /> New plan
+          </Link>
+        }
+      />
 
       {loading ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skeleton h-16" />
+        <ListRowsSkeleton />
+      ) : plans.length === 0 ? (
+        <div className="glass-card">
+          <EmptyState icon={Salad} title="No diet plans yet" description="Add a day of meals so members have something to cook." action={{ label: "Create plan", href: "/admin/diet/new" }} />
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {Object.entries(grouped).map(([preference, preferencePlans]) => (
+            <section key={preference}>
+              <div className="mb-3 flex items-center gap-2">
+                <h2 className="label-caps capitalize">{preference}</h2>
+                <span className="chip tabular-nums">{preferencePlans.length}</span>
+              </div>
+              <ul className="stagger space-y-2.5">
+                {preferencePlans.map((p) => (
+                  <li key={p.$id} className="glass-card flex flex-wrap items-center justify-between gap-x-4 gap-y-3 p-4">
+                    <div className="min-w-0 flex-1">
+                      <h3>{p.day}</h3>
+                      <p className="mt-1 truncate text-sm text-ink-muted">
+                        {p.breakfast} · {p.lunch} · {p.dinner} · {p.snack}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {confirmingDeleteId === p.$id ? (
+                        <div className="flex items-center gap-1 rounded-xl border border-red-400/20 bg-red-500/[0.06] p-1 pl-3">
+                          <span className="text-sm text-ink-muted">Delete?</span>
+                          <button onClick={() => setConfirmingDeleteId(null)} className="btn-ghost btn-sm">Cancel</button>
+                          <button onClick={() => handleDelete(p.$id)} disabled={deletingId === p.$id} className="btn-danger btn-sm w-[96px]">
+                            {deletingId === p.$id ? <Spinner /> : "Yes, delete"}
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <Link href={`/admin/diet/${p.$id}/edit`} className="btn-ghost btn-sm" aria-label={`Edit ${p.day}`}>
+                            <Pencil className="h-4 w-4" /> Edit
+                          </Link>
+                          <button onClick={() => setConfirmingDeleteId(p.$id)} className="icon-btn hover:!text-red-300" aria-label={`Delete ${p.day}`} title="Delete">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
         </div>
-      ) : plans.length === 0 ? (
-        <p className="text-ink-muted text-center py-12">No diet plans yet.</p>
-      ) : (
-        Object.entries(grouped).map(([preference, preferencePlans]) => (
-          <div key={preference} className="space-y-3">
-            <h2 className="text-xl capitalize">{preference}</h2>
-            {preferencePlans.map((p) => (
-              <div key={p.$id} className="glass-card p-4 flex items-center justify-between gap-4">
-                <div>
-                  <h3 className="font-bold">{p.day}</h3>
-                  <p className="text-sm text-ink-muted mt-1">
-                    {p.breakfast} • {p.lunch} • {p.dinner} • {p.snack}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <Link href={`/admin/diet/${p.$id}/edit`} className="text-drefit-lime">
-                    Edit
-                  </Link>
-                  {confirmingDeleteId === p.$id ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-ink-muted">Sure?</span>
-                      <button
-                        onClick={() => handleDelete(p.$id)}
-                        disabled={deletingId === p.$id}
-                        className="btn-danger"
-                      >
-                        {deletingId === p.$id ? "Deleting..." : "Yes, delete"}
-                      </button>
-                      <button onClick={() => setConfirmingDeleteId(null)} className="text-ink-muted">
-                        Never mind
-                      </button>
-                    </div>
-                  ) : (
-                    <button onClick={() => setConfirmingDeleteId(p.$id)} className="text-red-400">
-                      Delete
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ))
       )}
     </div>
   )

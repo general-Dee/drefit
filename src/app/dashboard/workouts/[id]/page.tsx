@@ -3,7 +3,9 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import confetti from "canvas-confetti"
-import { ArrowLeft, CheckCircle, Clock, Flame } from "lucide-react"
+import { ArrowLeft, Check, CloudOff, Clock, Flame, History } from "lucide-react"
+import { WorkoutDetailSkeleton } from "@/components/ui/skeletons"
+import { DUR, EASE_OUT } from "@/components/ui/motion"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import type { Exercise, WorkoutDoc } from "@/lib/appwrite/schema"
@@ -12,9 +14,9 @@ import { enqueueCompletion, isNetworkError, newClientId, postCompletion } from "
 export const dynamic = "force-dynamic"
 
 const difficultyStyles: Record<string, string> = {
-  beginner: "bg-drefit-lime/20 text-drefit-lime",
-  intermediate: "bg-white/10 text-white",
-  advanced: "bg-red-500/20 text-red-400",
+  beginner: "border-accent/30 bg-accent/10 text-accent",
+  intermediate: "border-white/15 bg-white/[0.06] text-ink",
+  advanced: "border-red-400/30 bg-red-500/10 text-red-300",
 }
 
 export default function WorkoutDetail({ params }: { params: { id: string } }) {
@@ -49,7 +51,7 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
     toast.success(`${name} completed!`)
     if (next.length === exercises.length) {
       confetti({ particleCount: 150, spread: 70, colors: ["#C8F135", "#F5F5F4"], disableForReducedMotion: true })
-      toast.success("🎉 Workout complete!")
+      toast.success("Workout complete!")
       const entry = { clientId: newClientId(), workoutId: params.id, completedAt: new Date().toISOString() }
       try {
         if (!navigator.onLine) throw new TypeError("offline")
@@ -65,77 +67,77 @@ export default function WorkoutDetail({ params }: { params: { id: string } }) {
         window.dispatchEvent(new Event("storage"))
         setCompletionCount((c) => c + 1)
         setLastCompletedAt(entry.completedAt)
-        toast("Saved offline — it will sync when you're back online.", { icon: "📶" })
+        toast("Saved offline — it will sync when you're back online.", { icon: <CloudOff className="h-4 w-4 text-accent" /> })
       }
     }
   }
 
-  if (loading) {
-    return <div className="page-shell max-w-2xl text-ink-muted">Loading...</div>
-  }
+  if (loading) return <WorkoutDetailSkeleton />
   if (!workout) return null
+
+  const pct = exercises.length ? completed.length / exercises.length : 0
 
   return (
     <div className="page-shell max-w-2xl">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-drefit-lime mb-4">
-        <ArrowLeft className="w-4 h-4" /> Back
+      <button onClick={() => router.back()} className="pressable -ml-1 mb-4 inline-flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm font-medium text-ink-muted transition-colors duration-base hover:text-ink">
+        <ArrowLeft className="h-4 w-4" /> Back
       </button>
-      <h1 className="fade-up font-bold mb-2">{workout.name}</h1>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted mb-1">
-        <span className="flex items-center gap-1">
-          <Clock className="w-4 h-4" /> {workout.duration} mins
-        </span>
-        <span className="flex items-center gap-1">
-          <Flame className="w-4 h-4" /> {workout.calories} cal
-        </span>
-        <span className={`px-2 py-0.5 rounded-full text-xs ${difficultyStyles[workout.difficulty] ?? "bg-white/10 text-white"}`}>
-          {workout.difficulty}
-        </span>
-        <span className="px-2 py-0.5 rounded-full text-xs bg-white/10">{workout.muscleGroup}</span>
-      </div>
-      {completionCount > 0 && lastCompletedAt && (
-        <p className="text-sm text-ink-muted mb-2">
-          Completed {completionCount}× — last on {format(new Date(lastCompletedAt), "MMM d, yyyy")}
-        </p>
-      )}
+      <header className="fade-up">
+        <div className="eyebrow mb-2">{workout.muscleGroup}</div>
+        <h1 className="break-words">{workout.name}</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
+          <span className="chip tabular-nums"><Clock className="h-3.5 w-3.5" /> {workout.duration} min</span>
+          <span className="chip tabular-nums"><Flame className="h-3.5 w-3.5" /> {workout.calories} kcal</span>
+          <span className={`chip capitalize ${difficultyStyles[workout.difficulty] ?? ""}`}>{workout.difficulty}</span>
+        </div>
+        {completionCount > 0 && lastCompletedAt && (
+          <p className="mt-3 flex items-center gap-1.5 text-sm text-ink-muted">
+            <History className="h-4 w-4" /> Completed {completionCount}× · last on {format(new Date(lastCompletedAt), "MMM d, yyyy")}
+          </p>
+        )}
+      </header>
 
-      <div className="w-full h-1.5 bg-white/10 rounded-full mt-4 overflow-hidden">
-        <motion.div
-          className="h-full bg-drefit-lime"
-          initial={false}
-          animate={{ width: `${(completed.length / exercises.length) * 100}%` }}
-          transition={{ ease: "easeOut" }}
-        />
+      <div className="glass-card mt-6 p-4">
+        <div className="mb-2.5 flex items-baseline justify-between text-sm">
+          <span className="font-medium">Session progress</span>
+          <span className="tabular-nums text-ink-muted">{completed.length}/{exercises.length} exercises</span>
+        </div>
+        <div className="progress-track" role="progressbar" aria-valuemin={0} aria-valuemax={exercises.length} aria-valuenow={completed.length}>
+          <div className="progress-fill" style={{ transform: `scaleX(${pct})` }} />
+        </div>
       </div>
-      <p className="text-xs text-ink-muted mt-1 mb-4">
-        {completed.length} of {exercises.length} exercises done
-      </p>
 
-      <div className="space-y-3 mt-4">
-        {exercises.map((ex, i) => (
-          <motion.div
-            key={ex.name}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="glass-card p-4 flex justify-between items-center"
-          >
-            <div>
-              <h3 className="font-bold">{ex.name}</h3>
-              <p className="text-sm text-ink-muted">
-                {ex.sets} sets x {ex.reps} reps • {ex.rest}s rest
-              </p>
-            </div>
-            {completed.includes(ex.name) ? (
-              <CheckCircle className="text-drefit-lime w-6 h-6" />
-            ) : (
-              <button onClick={() => markComplete(ex.name)} className="btn-primary px-4 py-1.5">
-                Done
-              </button>
-            )}
-          </motion.div>
-        ))}
-      </div>
+      <ol className="mt-4 space-y-2.5">
+        {exercises.map((ex, i) => {
+          const done = completed.includes(ex.name)
+          return (
+            <motion.li
+              key={ex.name}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: DUR.slow, ease: EASE_OUT }}
+              className={`glass-card flex items-center gap-4 p-4 transition-colors duration-base ${done ? "!border-accent/30" : ""}`}
+            >
+              <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-semibold tabular-nums ${done ? "lime-gradient" : "bg-white/[0.06] text-ink-muted"}`}>
+                {done ? <Check className="icon-strong h-4 w-4" /> : i + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className={`truncate ${done ? "text-ink-muted line-through decoration-white/30" : ""}`}>{ex.name}</h3>
+                <p className="text-sm tabular-nums text-ink-muted">
+                  {ex.sets} × {ex.reps} reps · {ex.rest}s rest
+                </p>
+              </div>
+              {done ? (
+                <span className="chip-accent">Done</span>
+              ) : (
+                <button onClick={() => markComplete(ex.name)} className="btn-primary btn-sm">
+                  Done
+                </button>
+              )}
+            </motion.li>
+          )
+        })}
+      </ol>
     </div>
   )
 }

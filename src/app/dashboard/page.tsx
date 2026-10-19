@@ -3,11 +3,13 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
-import { Flame, Calendar, Award, TrendingUp, ArrowRight } from "lucide-react"
+import { Flame, CalendarCheck, Award, TrendingUp, Play } from "lucide-react"
 import CountUp from "@/components/ui/CountUp"
 import ProgressRing from "@/components/ui/ProgressRing"
 import Skeleton from "@/components/ui/Skeleton"
 import PageHeader from "@/components/ui/PageHeader"
+import StatCard from "@/components/ui/StatCard"
+import { DashboardSkeleton } from "@/components/ui/skeletons"
 import CoachWhatsAppButton from "@/components/CoachWhatsAppButton"
 import FirstWeekCard from "@/components/FirstWeekCard"
 
@@ -46,8 +48,10 @@ export default function DashboardPage() {
   const hour = new Date().getHours()
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"
 
+  const toGo = stats ? Math.max(0, stats.weeklyGoal - stats.workoutsThisWeek) : 0
+
   return (
-    <div className="page-shell space-y-6">
+    <div className="page-shell space-y-4 md:space-y-6">
       <PageHeader
         eyebrow={greeting}
         title={<>Welcome back, {userName || "Athlete"}</>}
@@ -55,69 +59,54 @@ export default function DashboardPage() {
         action={<CoachWhatsAppButton />}
       />
 
-      {/* Weekly goal hero */}
-      <section className="glass-card fade-up flex items-center gap-5 p-5 sm:p-6">
-        {stats ? (
-          <ProgressRing
-            value={stats.workoutsThisWeek}
-            max={stats.weeklyGoal}
-            size={88}
-            stroke={8}
-            label={<span className="font-display text-lg">{stats.workoutsThisWeek}/{stats.weeklyGoal}</span>}
-          />
-        ) : (
-          <Skeleton className="h-[88px] w-[88px] rounded-full" />
-        )}
-        <div className="min-w-0">
-          <div className="eyebrow">Weekly goal</div>
-          <div className="mt-1 font-display text-xl font-semibold">
-            {stats ? (stats.workoutsThisWeek >= stats.weeklyGoal ? "Goal smashed this week" : `${Math.max(0, stats.weeklyGoal - stats.workoutsThisWeek)} workout${stats.weeklyGoal - stats.workoutsThisWeek === 1 ? "" : "s"} to go`) : "Loading your week..."}
+      {/* Weekly goal hero: the one primary action on this screen */}
+      <section className="glass-card fade-up overflow-hidden p-5 sm:p-6">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-accent-fade" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-5">
+            {stats ? (
+              <ProgressRing
+                value={stats.workoutsThisWeek}
+                max={stats.weeklyGoal}
+                size={88}
+                stroke={8}
+                label={<span className="font-display text-lg font-semibold tracking-tight">{stats.workoutsThisWeek}<span className="text-ink-subtle">/{stats.weeklyGoal}</span></span>}
+              />
+            ) : (
+              <Skeleton className="h-[88px] w-[88px] rounded-full" />
+            )}
+            <div className="min-w-0">
+              <div className="eyebrow">Weekly goal</div>
+              <div className="mt-1.5 font-display text-xl font-semibold tracking-tight">
+                {stats ? (toGo === 0 ? "Goal smashed this week" : `${toGo} workout${toGo === 1 ? "" : "s"} to go`) : <Skeleton className="h-7 w-44 rounded-md" />}
+              </div>
+              <p className="mt-1 text-sm text-ink-muted">
+                {stats && stats.streakDays === 0 ? "No streak yet. Train today to start one." : "Keep the momentum going."}
+              </p>
+            </div>
           </div>
-          <Link href="/dashboard/workouts" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-accent">
-            Start a workout <ArrowRight className="h-4 w-4" />
+          <Link href="/dashboard/workouts" className="btn-primary sm:ml-auto">
+            <Play className="h-4 w-4 fill-current" /> Start a workout
           </Link>
         </div>
       </section>
 
       <div className="stagger grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <StatCard icon={Flame} label="Calories today" loading={!stats}>
-          {stats && <CountUp value={stats.caloriesToday} />}
+          {stats && <><CountUp value={stats.caloriesToday} /><span className="stat-unit">kcal</span></>}
         </StatCard>
-        <StatCard icon={Calendar} label="Workouts this week" loading={!stats}>
-          {stats && <><CountUp value={stats.workoutsThisWeek} /><span className="text-ink-subtle">/{stats.weeklyGoal}</span></>}
+        <StatCard icon={CalendarCheck} label="This week" loading={!stats}>
+          {stats && <><CountUp value={stats.workoutsThisWeek} /><span className="text-ink-subtle">/{stats.weeklyGoal}</span><span className="stat-unit">workouts</span></>}
         </StatCard>
-        <StatCard icon={Award} label="Streak" loading={!stats}>
-          {stats && <><CountUp value={stats.streakDays} /> <span className="text-base text-ink-muted">day{stats.streakDays === 1 ? "" : "s"}</span></>}
+        <StatCard icon={Award} label="Streak" loading={!stats} hint={stats && stats.streakDays === 0 ? "Start one today" : undefined}>
+          {stats && <><CountUp value={stats.streakDays} /><span className="stat-unit">day{stats.streakDays === 1 ? "" : "s"}</span></>}
         </StatCard>
-        <StatCard icon={TrendingUp} label="Progress" loading={!stats}>
-          {stats && (delta == null ? <span className="text-base text-ink-muted">No data yet</span> : <CountUp value={delta} decimals={1} prefix={delta > 0 ? "+" : ""} suffix="kg" />)}
+        <StatCard icon={TrendingUp} label="Progress" loading={!stats} hint={stats && delta == null ? "Log your weight" : undefined}>
+          {stats && (delta == null ? <span className="text-ink-subtle">—</span> : <><CountUp value={delta} decimals={1} prefix={delta > 0 ? "+" : ""} /><span className="stat-unit">kg</span></>)}
         </StatCard>
       </div>
       <FirstWeekCard />
-    </div>
-  )
-}
-
-function StatCard({ icon: Icon, label, loading, children }: { icon: React.ComponentType<{ className?: string }>; label: string; loading: boolean; children: React.ReactNode }) {
-  return (
-    <div className="glass-card p-4">
-      <div className="flex items-center gap-2 text-xs font-medium text-ink-muted">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent/10 text-accent"><Icon className="h-4 w-4" /></span>
-        {label}
-      </div>
-      <div className="stat-value mt-3">{loading ? <Skeleton className="h-8 w-20" /> : children}</div>
-    </div>
-  )
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="page-shell space-y-6" aria-busy="true">
-      <Skeleton className="h-10 w-64" />
-      <Skeleton className="h-32 w-full" />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}
-      </div>
     </div>
   )
 }

@@ -1,7 +1,11 @@
 "use client"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Plus, Clock, Flame } from "lucide-react"
+import { Plus, Clock, Flame, Dumbbell, Pencil, Trash2 } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import EmptyState from "@/components/ui/EmptyState"
+import Spinner from "@/components/ui/Spinner"
+import { ListRowsSkeleton } from "@/components/ui/skeletons"
 import toast from "react-hot-toast"
 import type { WorkoutDoc } from "@/lib/appwrite/schema"
 
@@ -38,70 +42,61 @@ export default function AdminWorkoutsPage() {
   }
 
   return (
-    <div className="page-shell max-w-4xl space-y-6">
-      <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
-        <ArrowLeft className="w-4 h-4" /> Back to Admin
-      </Link>
-      <div className="flex items-center justify-between">
-        <h1 className="fade-up font-bold">Manage Workouts</h1>
-        <Link href="/admin/workouts/new" className="btn-primary px-4 py-2.5">
-          <Plus className="w-4 h-4" /> New Workout
-        </Link>
-      </div>
+    <div className="page-shell max-w-4xl">
+      <PageHeader
+        back={{ href: "/admin", label: "Admin" }}
+        title="Workouts"
+        subtitle="Your coach-built library. Members see these in Train."
+        action={
+          <Link href="/admin/workouts/new" className="btn-primary">
+            <Plus className="h-4 w-4" /> New workout
+          </Link>
+        }
+      />
 
       {loading ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skeleton h-16" />
-          ))}
-        </div>
+        <ListRowsSkeleton />
       ) : workouts.length === 0 ? (
-        <p className="text-ink-muted text-center py-12">No workouts yet.</p>
+        <div className="glass-card">
+          <EmptyState icon={Dumbbell} title="Your library is empty" description="Create the first workout. Members see it straight away." action={{ label: "Create workout", href: "/admin/workouts/new" }} />
+        </div>
       ) : (
-        <div className="space-y-3">
+        <ul className="stagger space-y-2.5">
           {workouts.map((w) => (
-            <div key={w.$id} className="glass-card p-4 flex items-center justify-between gap-4">
-              <div>
-                <h3 className="font-bold">{w.name}</h3>
-                <div className="flex gap-3 text-sm text-ink-muted mt-1">
-                  <span>{w.muscleGroup}</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {w.duration}m
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Flame className="w-3 h-3" /> {w.calories}
-                  </span>
-                  <span>{w.difficulty}</span>
-                  <span>{w.goal}</span>
+            <li key={w.$id} className="glass-card flex flex-wrap items-center justify-between gap-x-4 gap-y-3 p-4">
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate">{w.name}</h3>
+                <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
+                  <span className="chip">{w.muscleGroup}</span>
+                  <span className="chip tabular-nums"><Clock className="h-3 w-3" /> {w.duration} min</span>
+                  <span className="chip tabular-nums"><Flame className="h-3 w-3" /> {w.calories} kcal</span>
+                  <span className="chip capitalize">{w.difficulty}</span>
+                  <span className="chip capitalize">{w.goal}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <Link href={`/admin/workouts/${w.$id}/edit`} className="text-drefit-lime">
-                  Edit
-                </Link>
+              <div className="flex shrink-0 items-center gap-1">
                 {confirmingDeleteId === w.$id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-ink-muted">Sure?</span>
-                    <button
-                      onClick={() => handleDelete(w.$id)}
-                      disabled={deletingId === w.$id}
-                      className="btn-danger"
-                    >
-                      {deletingId === w.$id ? "Deleting..." : "Yes, delete"}
-                    </button>
-                    <button onClick={() => setConfirmingDeleteId(null)} className="text-ink-muted">
-                      Never mind
+                  <div className="flex items-center gap-1 rounded-xl border border-red-400/20 bg-red-500/[0.06] p-1 pl-3">
+                    <span className="text-sm text-ink-muted">Delete?</span>
+                    <button onClick={() => setConfirmingDeleteId(null)} className="btn-ghost btn-sm">Cancel</button>
+                    <button onClick={() => handleDelete(w.$id)} disabled={deletingId === w.$id} className="btn-danger btn-sm w-[96px]">
+                      {deletingId === w.$id ? <Spinner /> : "Yes, delete"}
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setConfirmingDeleteId(w.$id)} className="text-red-400">
-                    Delete
-                  </button>
+                  <>
+                    <Link href={`/admin/workouts/${w.$id}/edit`} className="btn-ghost btn-sm" aria-label={`Edit ${w.name}`}>
+                      <Pencil className="h-4 w-4" /> Edit
+                    </Link>
+                    <button onClick={() => setConfirmingDeleteId(w.$id)} className="icon-btn hover:!text-red-300" aria-label={`Delete ${w.name}`} title="Delete">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
                 )}
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   )

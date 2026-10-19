@@ -1,8 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
 import toast from "react-hot-toast"
 import type { DietPlanDoc } from "@/lib/appwrite/schema"
 import DietPlanForm from "../../DietPlanForm"
@@ -27,13 +26,10 @@ export default function EditDietPlanPage({ params }: { params: { id: string } })
   }, [params.id, router])
 
   return (
-    <div className="page-shell max-w-2xl space-y-6">
-      <Link href="/admin/diet" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
-        <ArrowLeft className="w-4 h-4" /> Back to Diet Plans
-      </Link>
-      <h1 className="fade-up font-bold">Edit Diet Plan</h1>
+    <div className="page-shell max-w-2xl">
+      <PageHeader back={{ href: "/admin/diet", label: "Diet plans" }} title="Edit diet plan" subtitle="Changes go live for members on save." />
       {loading ? (
-        <div className="skeleton p-4 h-48" />
+        <div className="skeleton w-full h-[520px]" />
       ) : plan ? (
         <DietPlanForm initialPlan={plan} />
       ) : null}

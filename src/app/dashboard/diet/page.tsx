@@ -1,6 +1,9 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Coffee, Sun, Moon, Apple, ShoppingCart } from "lucide-react"
+import { Coffee, Sun, Moon, Apple, ShoppingCart, Salad } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import EmptyState from "@/components/ui/EmptyState"
+import Skeleton from "@/components/ui/Skeleton"
 import toast from "react-hot-toast"
 import type { DietPlanDoc } from "@/lib/appwrite/schema"
 
@@ -34,70 +37,81 @@ export default function DietPage() {
     toast.success(`Shopping list for ${meals.day}: ${items}`, { duration: 8000 })
   }
 
+  const mealRows = meals
+    ? [
+        { key: "breakfast", label: "Breakfast", icon: Coffee, text: meals.breakfast },
+        { key: "lunch", label: "Lunch", icon: Sun, text: meals.lunch },
+        { key: "dinner", label: "Dinner", icon: Moon, text: meals.dinner },
+        { key: "snack", label: "Snack", icon: Apple, text: meals.snack },
+      ]
+    : []
+
   return (
-    <div className="page-shell space-y-6">
-      <h1 className="fade-up font-bold">Diet Plans</h1>
+    <div className="page-shell">
+      <PageHeader eyebrow="Nutrition" title="Diet plan" subtitle="Nigerian meals picked by your coach for each day." />
 
       {loading ? (
-        <p className="text-ink-muted">Loading...</p>
+        <DietBodySkeleton />
       ) : plans.length === 0 ? (
-        <p className="text-ink-muted">No diet plans available yet.</p>
+        <div className="glass-card">
+          <EmptyState icon={Salad} title="No meal plan yet" description="Your coach hasn't published meals for your diet yet. Ask them for one." action={{ label: "Message your coach", href: "/dashboard/coaching" }} />
+        </div>
       ) : (
-        <>
-          <div className="flex gap-2 flex-wrap">
-            {plans.map((p) => (
-              <button
-                key={p.$id}
-                onClick={() => setSelectedId(p.$id)}
-                className={`px-4 py-2 rounded-lg ${selectedId === p.$id ? "bg-accent text-accent-ink font-semibold" : "bg-white/[0.05] text-ink-muted hover:text-ink"}`}
-              >
-                {p.day}
-                {showPreferenceLabel ? ` (${p.dietaryPreference})` : ""}
-              </button>
-            ))}
+        <div className="space-y-5">
+          <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" role="tablist" aria-label="Day">
+            <div className="flex w-max gap-2">
+              {plans.map((p) => {
+                const active = selectedId === p.$id
+                return (
+                  <button
+                    key={p.$id}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setSelectedId(p.$id)}
+                    className={`pressable min-h-[40px] whitespace-nowrap rounded-xl border px-4 text-sm font-medium transition-colors duration-base ${
+                      active ? "border-transparent lime-gradient shadow-glow" : "border-line bg-white/[0.03] text-ink-muted hover:border-line-strong hover:text-ink"
+                    }`}
+                  >
+                    {p.day}
+                    {showPreferenceLabel ? ` (${p.dietaryPreference})` : ""}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {meals && (
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Coffee className="text-drefit-lime" />
-                  Breakfast
+            <div key={meals.$id} className="stagger grid gap-3 md:grid-cols-2 md:gap-4">
+              {mealRows.map((m) => (
+                <div key={m.key} className="glass-card flex gap-4 p-4 sm:p-5">
+                  <span className="icon-tile"><m.icon className="h-[18px] w-[18px]" /></span>
+                  <div className="min-w-0">
+                    <div className="label-caps">{m.label}</div>
+                    <p className="mt-1 break-words text-[15px] leading-6">{m.text}</p>
+                  </div>
                 </div>
-                <p>{meals.breakfast}</p>
-              </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sun className="text-drefit-lime" />
-                  Lunch
-                </div>
-                <p>{meals.lunch}</p>
-              </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Moon className="text-drefit-lime" />
-                  Dinner
-                </div>
-                <p>{meals.dinner}</p>
-              </div>
-              <div className="glass-card p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Apple className="text-drefit-lime" />
-                  Snack
-                </div>
-                <p>{meals.snack}</p>
-              </div>
+              ))}
             </div>
           )}
 
-          <button
-            onClick={handleGenerateShoppingList}
-            className="w-full glass-card p-4 flex items-center justify-center gap-2"
-          >
-            <ShoppingCart className="w-5 h-5" /> Generate Shopping List
+          <button onClick={handleGenerateShoppingList} className="btn-primary w-full sm:w-auto">
+            <ShoppingCart className="h-4 w-4" /> Generate shopping list
           </button>
-        </>
+        </div>
       )}
+    </div>
+  )
+}
+
+function DietBodySkeleton() {
+  return (
+    <div className="space-y-5" aria-busy="true">
+      <div className="flex gap-2 overflow-hidden">
+        {Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-10 w-[92px] shrink-0" />)}
+      </div>
+      <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[92px]" />)}
+      </div>
     </div>
   )
 }

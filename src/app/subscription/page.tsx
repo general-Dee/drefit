@@ -3,8 +3,11 @@ import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
+import { Dumbbell, LineChart, MessageCircle, Salad, ShieldCheck, Users } from "lucide-react"
 import Logo from "@/components/ui/Logo"
 import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
+
+import Spinner from "@/components/ui/Spinner"
 
 export const dynamic = 'force-dynamic'
 
@@ -97,20 +100,44 @@ export default function SubscriptionPage() {
     }
   }
 
+  const perks = [
+    { icon: Dumbbell, t: "Personalised workout plans" },
+    { icon: Salad, t: "Coach-designed Nigerian meal plans" },
+    { icon: MessageCircle, t: "1-on-1 coaching chat" },
+    { icon: LineChart, t: "Progress tracking & analytics" },
+    { icon: Users, t: "Community access & challenges" },
+  ]
+
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
+    <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 py-12">
       <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-accent/10 blur-[110px]" />
       <Logo className="relative mb-8" />
-      <div className="glass-card fade-up relative p-6 sm:p-8 max-w-md w-full text-center">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2">{isRenewal ? "Renew Subscription" : "Premium Monthly"}</h1>
-        <p className="my-3 font-display text-5xl font-bold tabular-nums tracking-tight text-accent">₦{PLAN_PRICE_NGN.toLocaleString()}</p>
-        <p className="text-ink-muted mb-6">
-          {isRenewal ? "Your last billing period has ended — renew to keep your access." : "per month, billed monthly"}
+      <div className="glass-card fade-up relative w-full max-w-md overflow-hidden p-6 sm:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-accent-fade" />
+        <div className="flex items-center justify-between gap-3">
+          <span className="eyebrow">{isRenewal ? "Renewal" : "Premium"}</span>
+          <span className="chip"><ShieldCheck className="h-3.5 w-3.5 text-accent" /> Secured by Paystack</span>
+        </div>
+        <h1 className="mt-3 text-2xl sm:text-[1.75rem]">{isRenewal ? "Renew subscription" : "Premium Monthly"}</h1>
+        <div className="mt-4 flex items-baseline gap-2">
+          <span className="font-display text-5xl font-bold tabular-nums tracking-[-0.04em]">₦{PLAN_PRICE_NGN.toLocaleString()}</span>
+          <span className="text-ink-muted">/ month</span>
+        </div>
+        <p className="mt-2 text-sm text-ink-muted">
+          {isRenewal ? "Your last billing period has ended — renew to keep your access." : "Billed monthly through Paystack."}
         </p>
-        <button onClick={handleSubscribe} disabled={loading || !PaystackPop} className="btn-primary w-full py-4 text-base shadow-glow">
-          {loading ? "Processing..." : isRenewal ? "Renew Now" : "Subscribe Now"}
+        <ul className="mt-6 space-y-3 border-t border-line pt-6">
+          {perks.map((p) => (
+            <li key={p.t} className="flex items-center gap-3 text-sm">
+              <span className="icon-tile h-7 w-7 rounded-lg"><p.icon className="h-3.5 w-3.5" /></span>
+              {p.t}
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleSubscribe} disabled={loading || !PaystackPop} className="btn-primary btn-lg mt-8 w-full">
+          {loading ? <><Spinner /> Processing</> : isRenewal ? "Renew now" : "Subscribe now"}
         </button>
-        <p className="text-ink-subtle text-sm mt-4">Cancel anytime. No commitment.</p>
+        <p className="mt-3 text-center text-xs text-ink-subtle">Cancel anytime. No commitment.</p>
       </div>
     </div>
   )

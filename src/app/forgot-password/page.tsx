@@ -4,6 +4,8 @@ import { Mail } from "lucide-react"
 import toast from "react-hot-toast"
 import Logo from "@/components/ui/Logo"
 
+import Spinner from "@/components/ui/Spinner"
+
 export const dynamic = 'force-dynamic'
 
 export default function ForgotPasswordPage() {
@@ -50,7 +52,7 @@ export default function ForgotPasswordPage() {
                 <input type="email" placeholder="Email" className="input-field pl-10" value={email} onChange={e=>setEmail(e.target.value)} required />
               </div>
               <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-                {loading ? "Sending..." : "Send Reset Link"}
+                {loading ? <><Spinner /> Sending</> : "Send reset link"}
               </button>
             </form>
           </>

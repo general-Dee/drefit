@@ -1,7 +1,10 @@
 "use client"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ChevronRight, Inbox } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import EmptyState from "@/components/ui/EmptyState"
+import { ListRowsSkeleton } from "@/components/ui/skeletons"
 
 export const dynamic = "force-dynamic"
 
@@ -25,40 +28,38 @@ export default function AdminCoachingInboxPage() {
   }, [])
 
   return (
-    <div className="page-shell max-w-4xl space-y-6">
-      <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink">
-        <ArrowLeft className="w-4 h-4" /> Back to Admin
-      </Link>
-      <h1 className="fade-up font-bold">Coaching Messages</h1>
+    <div className="page-shell max-w-4xl">
+      <PageHeader back={{ href: "/admin", label: "Admin" }} title="Coaching inbox" subtitle="Member conversations, newest first." />
 
       {loading ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skeleton h-16" />
-          ))}
-        </div>
+        <ListRowsSkeleton />
       ) : threads.length === 0 ? (
-        <p className="text-ink-muted text-center py-12">No conversations yet.</p>
-      ) : (
-        <div className="space-y-3">
-          {threads.map((t) => (
-            <Link
-              key={t.userId}
-              href={`/admin/coaching/${t.userId}`}
-              className="glass-card p-4 flex items-center justify-between gap-4 hover:border-drefit-lime/40 transition-colors"
-            >
-              <div>
-                <h3 className="font-bold">{t.userName}</h3>
-                <p className="text-sm text-ink-muted mt-1 line-clamp-1">
-                  {t.lastFromAdmin ? "You: " : ""}{t.lastMessage}
-                </p>
-              </div>
-              <span className="text-xs text-ink-subtle shrink-0">
-                {new Date(t.lastMessageAt).toLocaleString()}
-              </span>
-            </Link>
-          ))}
+        <div className="glass-card">
+          <EmptyState icon={Inbox} title="Inbox zero" description="When members message their coach, conversations show up here." />
         </div>
+      ) : (
+        <ul className="stagger space-y-2.5">
+          {threads.map((t) => (
+            <li key={t.userId}>
+              <Link href={`/admin/coaching/${t.userId}`} className="group glass-card card-interactive flex items-center gap-4 p-4">
+                <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent/30 to-accent/5 text-xs font-semibold text-accent ring-1 ring-inset ring-accent/20">
+                  {(t.userName || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="truncate">{t.userName}</h3>
+                    <span className="shrink-0 text-xs tabular-nums text-ink-subtle">{new Date(t.lastMessageAt).toLocaleString()}</span>
+                  </div>
+                  <p className="mt-0.5 line-clamp-1 text-sm text-ink-muted">
+                    {t.lastFromAdmin ? <span className="text-ink-subtle">You: </span> : !t.lastFromAdmin && <span className="mr-1.5 inline-block h-1.5 w-1.5 -translate-y-0.5 rounded-full bg-accent" aria-label="Awaiting reply" />}
+                    {t.lastMessage}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-ink-subtle transition-transform duration-base group-hover:translate-x-0.5" />
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )

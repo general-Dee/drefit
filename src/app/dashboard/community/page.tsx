@@ -1,7 +1,14 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
-import { Heart, MessageCircle, Trophy } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import { formatDistanceToNow } from "date-fns"
+import { ChevronDown, Heart, MessageCircle, Send, Trophy, Users } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import EmptyState from "@/components/ui/EmptyState"
+import Spinner from "@/components/ui/Spinner"
+import { FeedSkeleton } from "@/components/ui/skeletons"
+import { SPRING, reveal } from "@/components/ui/motion"
 import toast from "react-hot-toast"
 import type { CommunityCommentDoc, CommunityPostDoc } from "@/lib/appwrite/schema"
 
@@ -106,99 +113,140 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="page-shell space-y-6">
-      <h1 className="fade-up font-bold">Community</h1>
+    <div className="page-shell">
+      <PageHeader eyebrow="Community" title="Train together" subtitle="Share wins, ask questions and cheer each other on." />
 
-      <div className="glass-card p-4">
-        <textarea
-          placeholder="Share your fitness journey..."
-          className="input-field"
-          rows={2}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <button
-          onClick={handlePost}
-          disabled={posting || !content.trim()}
-          className="btn-primary mt-2"
-        >
-          {posting ? "Posting..." : "Post"}
-        </button>
-      </div>
-
-      {loading ? (
-        <p className="text-ink-muted">Loading...</p>
-      ) : posts.length === 0 ? (
-        <p className="text-ink-muted">No posts yet — be the first to share something.</p>
-      ) : (
-        posts.map((p) => {
-          const liked = !!userId && p.likedBy.includes(userId)
-          return (
-            <div key={p.$id} className="glass-card p-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-drefit-lime/20 flex items-center justify-center">💪</div>
-                <span className="font-bold">{p.userName}</span>
-              </div>
-              <p className="mt-2">{p.content}</p>
-              <div className="flex gap-4 mt-3">
-                <button
-                  onClick={() => handleToggleLike(p)}
-                  className={`flex gap-1 ${liked ? "text-drefit-lime" : "text-ink-muted"}`}
-                >
-                  <Heart className="w-4 h-4" /> {p.likedBy.length}
-                </button>
-                <button onClick={() => handleToggleComments(p.$id)} className="flex gap-1 text-ink-muted">
-                  <MessageCircle className="w-4 h-4" />
-                  {expanded[p.$id] ? (comments[p.$id]?.length ?? 0) : "Comments"}
-                </button>
-              </div>
-
-              {expanded[p.$id] && (
-                <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
-                  {(comments[p.$id] ?? []).map((c) => (
-                    <div key={c.$id} className="text-sm">
-                      <span className="font-bold">{c.userName}</span> <span className="text-gray-300">{c.content}</span>
-                    </div>
-                  ))}
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      type="text"
-                      placeholder="Add a comment..."
-                      className="input-field flex-1 py-2.5 text-sm"
-                      value={commentDrafts[p.$id] ?? ""}
-                      onChange={(e) => setCommentDrafts((prev) => ({ ...prev, [p.$id]: e.target.value }))}
-                    />
-                    <button
-                      onClick={() => handleAddComment(p.$id)}
-                      disabled={commentSubmitting[p.$id]}
-                      className="text-drefit-lime text-sm px-3 disabled:opacity-50"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-              )}
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0 space-y-3">
+          <div className="glass-card p-4">
+            <label htmlFor="new-post" className="sr-only">Share your fitness journey</label>
+            <textarea
+              id="new-post"
+              placeholder="Share your fitness journey..."
+              className="input-field resize-none"
+              rows={3}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+            />
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="text-xs text-ink-subtle">Be kind. Keep it about the journey.</span>
+              <button onClick={handlePost} disabled={posting || !content.trim()} className="btn-primary btn-sm w-[92px]">
+                {posting ? <Spinner /> : <Send className="h-4 w-4" />} {posting ? "Posting" : "Post"}
+              </button>
             </div>
-          )
-        })
-      )}
+          </div>
 
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Trophy className="text-drefit-lime" /> Weekly Leaderboard
+          {loading ? (
+            <FeedSkeleton />
+          ) : posts.length === 0 ? (
+            <div className="glass-card">
+              <EmptyState icon={Users} title="No posts yet" description="Be the first to share a win, a question or today's session." />
+            </div>
+          ) : (
+            <div className="stagger space-y-3">
+              {posts.map((p) => {
+                const liked = !!userId && p.likedBy.includes(userId)
+                const open = !!expanded[p.$id]
+                return (
+                  <article key={p.$id} className="glass-card p-4">
+                    <header className="flex items-center gap-3">
+                      <Avatar name={p.userName} />
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold">{p.userName}</div>
+                        {p.createdAt && <div className="text-xs text-ink-subtle">{timeAgo(p.createdAt)}</div>}
+                      </div>
+                    </header>
+                    <p className="mt-3 whitespace-pre-wrap break-words text-[15px] leading-6">{p.content}</p>
+                    <div className="mt-3 flex gap-1 border-t border-line pt-2">
+                      <button
+                        onClick={() => handleToggleLike(p)}
+                        aria-pressed={liked}
+                        className={`btn-ghost btn-sm gap-1.5 tabular-nums ${liked ? "!text-accent" : ""}`}
+                      >
+                        <motion.span key={liked ? "on" : "off"} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={SPRING} className="inline-flex">
+                          <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+                        </motion.span>
+                        {p.likedBy.length}
+                      </button>
+                      <button onClick={() => handleToggleComments(p.$id)} aria-expanded={open} className="btn-ghost btn-sm gap-1.5 tabular-nums">
+                        <MessageCircle className="h-4 w-4" />
+                        {open ? (comments[p.$id]?.length ?? 0) : "Comments"}
+                        <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-base ${open ? "rotate-180" : ""}`} />
+                      </button>
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {open && (
+                        <motion.div {...reveal} className="mt-2 space-y-3 rounded-xl bg-white/[0.025] p-3">
+                          {(comments[p.$id] ?? []).length === 0 && <p className="text-xs text-ink-subtle">No comments yet. Start the thread.</p>}
+                          {(comments[p.$id] ?? []).map((c) => (
+                            <div key={c.$id} className="flex gap-2.5 text-sm">
+                              <Avatar name={c.userName} size="sm" />
+                              <div className="min-w-0">
+                                <span className="font-semibold">{c.userName}</span>{" "}
+                                <span className="break-words text-ink-muted">{c.content}</span>
+                              </div>
+                            </div>
+                          ))}
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Add a comment..."
+                              aria-label="Add a comment"
+                              className="input-field flex-1 min-h-[40px] py-2 text-sm"
+                              value={commentDrafts[p.$id] ?? ""}
+                              onChange={(e) => setCommentDrafts((prev) => ({ ...prev, [p.$id]: e.target.value }))}
+                            />
+                            <button onClick={() => handleAddComment(p.$id)} disabled={commentSubmitting[p.$id]} className="btn-secondary btn-sm w-[68px]">
+                              {commentSubmitting[p.$id] ? <Spinner /> : "Add"}
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </article>
+                )
+              })}
+            </div>
+          )}
         </div>
-        {leaderboard.length === 0 ? (
-          <p className="text-sm text-ink-muted">No workouts completed this week yet.</p>
-        ) : (
-          <ol className="space-y-1 text-sm">
-            {leaderboard.map((entry, i) => (
-              <li key={i}>
-                #{i + 1} {entry.name} ({entry.count} workout{entry.count === 1 ? "" : "s"})
-              </li>
-            ))}
-          </ol>
-        )}
+
+        <aside className="glass-card h-fit p-4 lg:sticky lg:top-20">
+          <div className="section-title">
+            <div className="flex items-center gap-2.5">
+              <span className="icon-tile h-8 w-8 rounded-lg"><Trophy className="h-4 w-4" /></span>
+              <h2 className="text-base">Weekly leaderboard</h2>
+            </div>
+          </div>
+          {leaderboard.length === 0 ? (
+            <EmptyState compact icon={Trophy} title="No workouts yet this week" description="Finish a session to claim the top spot." action={{ label: "Start a workout", href: "/dashboard/workouts", variant: "secondary" }} />
+          ) : (
+            <ol className="space-y-1">
+              {leaderboard.map((entry, i) => (
+                <li key={i} className="flex items-center gap-3 rounded-xl px-2 py-2 text-sm">
+                  <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold tabular-nums ${i === 0 ? "lime-gradient" : "bg-white/[0.06] text-ink-muted"}`}>{i + 1}</span>
+                  <span className="min-w-0 flex-1 truncate">{entry.name}</span>
+                  <span className="tabular-nums text-ink-muted">{entry.count}<span className="ml-1 text-xs text-ink-subtle">workout{entry.count === 1 ? "" : "s"}</span></span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </aside>
       </div>
     </div>
   )
+}
+
+function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+  const initials = (name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase()
+  return (
+    <span aria-hidden className={`grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent/30 to-accent/5 font-semibold text-accent ring-1 ring-inset ring-accent/20 ${size === "sm" ? "h-7 w-7 text-[10px]" : "h-10 w-10 text-xs"}`}>
+      {initials}
+    </span>
+  )
+}
+
+function timeAgo(iso: string) {
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? "" : formatDistanceToNow(d, { addSuffix: true })
 }

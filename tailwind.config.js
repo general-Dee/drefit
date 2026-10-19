@@ -17,12 +17,15 @@ module.exports = {
           charcoal: "#E4E4E7",
           "dark-secondary": "#111113",
         },
+        // Elevation steps: each layer is ~3% lighter than the one below.
         surface: {
           0: "#0A0A0B",
           1: "#111113",
-          2: "#18181B",
-          3: "#222226",
+          2: "#17171A",
+          3: "#1F1F23",
+          4: "#28282D",
         },
+        line: { DEFAULT: "rgba(255,255,255,0.07)", strong: "rgba(255,255,255,0.12)" },
         ink: { DEFAULT: "#F5F5F4", muted: "#A1A1AA", subtle: "#8B8B94" },
         accent: { DEFAULT: "#C8F135", hover: "#D6F95E", ink: "#0A0A0B", soft: "rgba(200,241,53,0.12)" },
         // Lifted greys so small text stays AA on near-black.
@@ -55,11 +58,22 @@ module.exports = {
       borderRadius: { xl: "0.875rem", "2xl": "1.25rem", "3xl": "1.75rem" },
       boxShadow: {
         glow: "0 0 0 1px rgba(200,241,53,0.35), 0 8px 32px -8px rgba(200,241,53,0.35)",
-        card: "0 1px 0 0 rgba(255,255,255,0.06) inset, 0 20px 40px -24px rgba(0,0,0,0.8)",
+        "glow-lg": "0 0 0 1px rgba(200,241,53,0.45), 0 12px 40px -6px rgba(200,241,53,0.45)",
+        card: "inset 0 1px 0 0 rgba(255,255,255,0.06), 0 1px 2px rgba(0,0,0,0.4), 0 20px 40px -24px rgba(0,0,0,0.8)",
+        "elev-1": "0 1px 2px rgba(0,0,0,0.4), 0 4px 12px -6px rgba(0,0,0,0.5)",
+        "elev-2": "0 2px 4px rgba(0,0,0,0.35), 0 12px 28px -12px rgba(0,0,0,0.7)",
+        "elev-3": "0 4px 8px rgba(0,0,0,0.35), 0 24px 56px -20px rgba(0,0,0,0.85)",
       },
-      transitionTimingFunction: { spring: "cubic-bezier(0.22, 1, 0.36, 1)" },
+      backgroundImage: {
+        "accent-grad": "linear-gradient(135deg, #DDFB72 0%, #C8F135 45%, #B1E01F 100%)",
+        "accent-fade": "linear-gradient(90deg, rgba(200,241,53,0) 0%, rgba(200,241,53,0.6) 50%, rgba(200,241,53,0) 100%)",
+      },
+      // Motion tokens (mirrored as CSS vars in globals.css and in components/ui/motion.ts)
+      transitionTimingFunction: { spring: "cubic-bezier(0.22, 1, 0.36, 1)", out: "cubic-bezier(0.22, 1, 0.36, 1)", "in-out": "cubic-bezier(0.65, 0, 0.35, 1)" },
+      transitionDuration: { fast: "120ms", base: "200ms", slow: "320ms", slower: "520ms" },
       animation: {
-        "fade-up": "fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both",
+        "fade-up": "fade-up 0.52s cubic-bezier(0.22, 1, 0.36, 1) both",
+        spin: "spin 0.8s linear infinite",
         "fade-in": "fade-in 0.4s ease-out both",
         shimmer: "shimmer 1.6s linear infinite",
         "glow-pulse": "glow-pulse 2.4s ease-in-out infinite",

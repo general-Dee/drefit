@@ -1,16 +1,18 @@
 "use client"
 import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
 import Link from "next/link"
-import { Search, Clock, Flame, ChevronRight } from "lucide-react"
+import { Search, SearchX, Clock, Flame, ChevronRight, Dumbbell } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
+import EmptyState from "@/components/ui/EmptyState"
+import { WorkoutCardsSkeleton } from "@/components/ui/skeletons"
 import type { WorkoutDoc } from "@/lib/appwrite/schema"
 
 export const dynamic = "force-dynamic"
 
 const difficultyStyles: Record<string, string> = {
-  beginner: "bg-drefit-lime/20 text-drefit-lime",
-  intermediate: "bg-white/10 text-white",
-  advanced: "bg-red-500/20 text-red-400",
+  beginner: "border-accent/30 bg-accent/10 text-accent",
+  intermediate: "border-white/15 bg-white/[0.06] text-ink",
+  advanced: "border-red-400/30 bg-red-500/10 text-red-300",
 }
 
 export default function WorkoutsPage() {
@@ -28,13 +30,14 @@ export default function WorkoutsPage() {
   const filtered = workouts.filter((w) => w.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="page-shell space-y-6">
-      <h1 className="fade-up font-bold">Workout Plans</h1>
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle w-5 h-5" />
+    <div className="page-shell">
+      <PageHeader eyebrow="Train" title="Workout plans" subtitle="Coach-built sessions. Pick one and press play." />
+      <div className="relative mb-5">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-ink-subtle" />
         <input
-          type="text"
+          type="search"
           placeholder="Search workouts..."
+          aria-label="Search workouts"
           className="input-field pl-10"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -42,42 +45,35 @@ export default function WorkoutsPage() {
       </div>
 
       {loading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="skeleton p-5 h-32" />
-          ))}
-        </div>
+        <WorkoutCardsSkeleton />
       ) : filtered.length === 0 ? (
-        <p className="text-ink-muted text-center py-12">No workouts found.</p>
+        <div className="glass-card">
+          {workouts.length === 0 ? (
+            <EmptyState icon={Dumbbell} title="No workouts yet" description="Your coach is building your library. Check back soon or message them." action={{ label: "Message your coach", href: "/dashboard/coaching" }} />
+          ) : (
+            <EmptyState icon={SearchX} title="No matches" description={<>Nothing matches &ldquo;{search}&rdquo;. Try a different name.</>} action={{ label: "Clear search", onClick: () => setSearch("") }} />
+          )}
+        </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="stagger grid gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
           {filtered.map((w) => (
-            <Link key={w.$id} href={`/dashboard/workouts/${w.$id}`} className="group">
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="glass-card p-5 h-full flex flex-col justify-between card-interactive cursor-pointer"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-xl leading-tight">{w.name}</h3>
-                    <span className={`shrink-0 text-xs px-2 py-1 rounded-full ${difficultyStyles[w.difficulty] ?? "bg-white/10 text-white"}`}>
-                      {w.difficulty}
-                    </span>
-                  </div>
-                  <p className="text-sm text-ink-muted mt-1">{w.muscleGroup}</p>
+            <Link key={w.$id} href={`/dashboard/workouts/${w.$id}`} className="group glass-card card-interactive flex h-full min-h-[164px] flex-col justify-between p-5">
+              <div className="min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="line-clamp-2 text-[17px] leading-6">{w.name}</h3>
+                  <span className={`chip shrink-0 capitalize ${difficultyStyles[w.difficulty] ?? ""}`}>{w.difficulty}</span>
                 </div>
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                  <div className="flex gap-3 text-sm text-ink-muted">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" /> {w.duration}m
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Flame className="w-4 h-4" /> {w.calories}
-                    </span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-drefit-lime group-hover:translate-x-1 transition-transform" />
+                <p className="mt-1 truncate text-sm text-ink-muted">{w.muscleGroup}</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+                <div className="flex gap-4 text-sm tabular-nums text-ink-muted">
+                  <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {w.duration} min</span>
+                  <span className="flex items-center gap-1.5"><Flame className="h-4 w-4" /> {w.calories} kcal</span>
                 </div>
-              </motion.div>
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-accent/10 text-accent transition-transform duration-base ease-out group-hover:translate-x-0.5">
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              </div>
             </Link>
           ))}
         </div>

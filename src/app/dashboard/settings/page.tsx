@@ -166,7 +166,7 @@ export default function SettingsPage() {
         </p>
         <input
           type="tel"
-          placeholder="WhatsApp number, e.g. 0803 123 4567"
+          placeholder="WhatsApp number, e.g. 0816 551 0842"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="input-field"

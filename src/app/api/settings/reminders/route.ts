@@ -33,7 +33,7 @@ export async function PATCH(req: NextRequest) {
   const raw = parsed.data.phone ?? ""
   const phone = raw ? normalizePhone(raw) : null
   if (raw && !phone) {
-    return NextResponse.json({ error: "Enter a valid phone number, e.g. 0803 123 4567 or +234 803 123 4567." }, { status: 400 })
+    return NextResponse.json({ error: "Enter a valid phone number, e.g. 0816 551 0842 or +234 816 551 0842." }, { status: 400 })
   }
   if (parsed.data.whatsappOptIn && !phone) {
     return NextResponse.json({ error: "Add your WhatsApp number to turn on reminders." }, { status: 400 })

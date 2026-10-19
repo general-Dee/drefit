@@ -1,10 +1,11 @@
 "use client"
 import { MessageCircle } from "lucide-react"
 import { buildCoachWhatsAppLink } from "@/lib/whatsapp/coach-link"
+import { getCoachWhatsAppNumber } from "@/lib/whatsapp/coach-number"
 
-// Hidden unless NEXT_PUBLIC_COACH_WHATSAPP is set to a valid number.
+// Uses NEXT_PUBLIC_COACH_WHATSAPP, falling back to the default coach line.
 export default function CoachWhatsAppButton({ className = "" }: { className?: string }) {
-  const href = buildCoachWhatsAppLink(process.env.NEXT_PUBLIC_COACH_WHATSAPP, "Hi coach, I'm messaging from Drefit.")
+  const href = buildCoachWhatsAppLink(getCoachWhatsAppNumber(process.env.NEXT_PUBLIC_COACH_WHATSAPP), "Hi coach, I'm messaging from Drefit.")
   if (!href) return null
   return (
     <a

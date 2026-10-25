@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { Query } from "node-appwrite"
+import { Query } from "@/lib/db/query"
 import { requireAdmin } from "@/lib/admin-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, DIET_PLANS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { DIET_PLANS_COLLECTION_ID } from "@/lib/db/schema"
 
 const dietPlanSchema = z.object({
   dietaryPreference: z.enum(["omnivore", "vegetarian", "keto", "halal"]),
@@ -18,8 +18,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  const plan = await serverDatabases
-    .getDocument(DATABASE_ID, DIET_PLANS_COLLECTION_ID, params.id)
+  const plan = await db
+    .getDocument(DIET_PLANS_COLLECTION_ID, params.id)
     .catch(() => null)
 
   if (!plan) {
@@ -39,7 +39,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Please check the diet plan fields." }, { status: 400 })
   }
 
-  const existing = await serverDatabases.listDocuments(DATABASE_ID, DIET_PLANS_COLLECTION_ID, [
+  const existing = await db.listDocuments(DIET_PLANS_COLLECTION_ID, [
     Query.equal("dietaryPreference", parsed.data.dietaryPreference),
     Query.equal("day", parsed.data.day),
     Query.limit(1),
@@ -51,8 +51,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     )
   }
 
-  const plan = await serverDatabases
-    .updateDocument(DATABASE_ID, DIET_PLANS_COLLECTION_ID, params.id, parsed.data)
+  const plan = await db
+    .updateDocument(DIET_PLANS_COLLECTION_ID, params.id, parsed.data)
     .catch(() => null)
 
   if (!plan) {
@@ -66,7 +66,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  await serverDatabases.deleteDocument(DATABASE_ID, DIET_PLANS_COLLECTION_ID, params.id).catch(() => null)
+  await db.deleteDocument(DIET_PLANS_COLLECTION_ID, params.id).catch(() => null)
 
   return NextResponse.json({ success: true })
 }

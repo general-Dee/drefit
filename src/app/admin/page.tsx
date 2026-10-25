@@ -3,22 +3,22 @@ import { Users, Wallet, Dumbbell, ChevronRight, Salad, MessagesSquare } from "lu
 import PageHeader from "@/components/ui/PageHeader"
 import StatCard from "@/components/ui/StatCard"
 import CountUp from "@/components/ui/CountUp"
-import { Query } from "node-appwrite"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID, WORKOUTS_COLLECTION_ID, DIET_PLANS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { Query } from "@/lib/db/query"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID, WORKOUTS_COLLECTION_ID, DIET_PLANS_COLLECTION_ID } from "@/lib/db/schema"
 import { PLAN_PRICE_NGN } from "@/lib/paystack/plan"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminPage() {
   const [totalUsers, activeSubscribers, totalWorkouts, totalDietPlans] = await Promise.all([
-    serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [Query.limit(1)]),
-    serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+    db.listDocuments(USERS_COLLECTION_ID, [Query.limit(1)]),
+    db.listDocuments(USERS_COLLECTION_ID, [
       Query.equal("subscriptionStatus", "active"),
       Query.limit(1),
     ]),
-    serverDatabases.listDocuments(DATABASE_ID, WORKOUTS_COLLECTION_ID, [Query.limit(1)]),
-    serverDatabases.listDocuments(DATABASE_ID, DIET_PLANS_COLLECTION_ID, [Query.limit(1)]),
+    db.listDocuments(WORKOUTS_COLLECTION_ID, [Query.limit(1)]),
+    db.listDocuments(DIET_PLANS_COLLECTION_ID, [Query.limit(1)]),
   ])
 
   // Current active-subscriber count x price, not true recurring MRR (no proration/tiers).

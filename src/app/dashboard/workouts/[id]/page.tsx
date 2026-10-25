@@ -8,7 +8,7 @@ import { WorkoutDetailSkeleton } from "@/components/ui/skeletons"
 import { DUR, EASE_OUT } from "@/components/ui/motion"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
-import type { Exercise, WorkoutDoc } from "@/lib/appwrite/schema"
+import type { Exercise, WorkoutDoc } from "@/lib/db/schema"
 import { enqueueCompletion, isNetworkError, newClientId, postCompletion } from "@/lib/offline-queue"
 
 export const dynamic = "force-dynamic"

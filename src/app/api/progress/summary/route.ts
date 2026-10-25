@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server"
-import { Query } from "node-appwrite"
+import { Query } from "@/lib/db/query"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
+import { db } from "@/lib/db/client"
 import {
-  DATABASE_ID,
   PROGRESS_LOGS_COLLECTION_ID,
   PROGRESS_PHOTOS_COLLECTION_ID,
   WORKOUT_COMPLETIONS_COLLECTION_ID,
   type ProgressLogDoc,
   type ProgressPhotoDoc,
   type WorkoutCompletionDoc,
-} from "@/lib/appwrite/schema"
+} from "@/lib/db/schema"
 import { computeStreaks, summarizeWeights } from "@/lib/progress"
 
 // Combined progress view: weight trend, photo timeline and streaks.
@@ -20,17 +19,17 @@ export async function GET() {
   const userId = gate.session.user.id
 
   const [logs, photos, completions] = await Promise.all([
-    serverDatabases.listDocuments(DATABASE_ID, PROGRESS_LOGS_COLLECTION_ID, [
+    db.listDocuments(PROGRESS_LOGS_COLLECTION_ID, [
       Query.equal("userId", userId),
       Query.orderAsc("loggedAt"),
       Query.limit(500),
     ]),
-    serverDatabases.listDocuments(DATABASE_ID, PROGRESS_PHOTOS_COLLECTION_ID, [
+    db.listDocuments(PROGRESS_PHOTOS_COLLECTION_ID, [
       Query.equal("userId", userId),
       Query.orderAsc("takenAt"),
       Query.limit(100),
     ]),
-    serverDatabases.listDocuments(DATABASE_ID, WORKOUT_COMPLETIONS_COLLECTION_ID, [
+    db.listDocuments(WORKOUT_COMPLETIONS_COLLECTION_ID, [
       Query.equal("userId", userId),
       Query.orderDesc("completedAt"),
       Query.limit(1000),

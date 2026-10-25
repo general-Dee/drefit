@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server"
-import { Query } from "node-appwrite"
+import { Query } from "@/lib/db/query"
 import { computeStreaks } from "@/lib/progress"
 import { lagosDateKey } from "@/lib/lagos-time"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
+import { db } from "@/lib/db/client"
 import {
-  DATABASE_ID,
   WORKOUT_COMPLETIONS_COLLECTION_ID,
   WORKOUTS_COLLECTION_ID,
   PROGRESS_LOGS_COLLECTION_ID,
   type WorkoutCompletionDoc,
   type WorkoutDoc,
   type ProgressLogDoc,
-} from "@/lib/appwrite/schema"
+} from "@/lib/db/schema"
 
 const WEEKLY_WORKOUT_GOAL = 7
 
@@ -23,12 +22,12 @@ export async function GET() {
   const userId = session.user.id
 
   const [completionsResult, logsResult] = await Promise.all([
-    serverDatabases.listDocuments(DATABASE_ID, WORKOUT_COMPLETIONS_COLLECTION_ID, [
+    db.listDocuments(WORKOUT_COMPLETIONS_COLLECTION_ID, [
       Query.equal("userId", userId),
       Query.orderDesc("completedAt"),
       Query.limit(500),
     ]),
-    serverDatabases.listDocuments(DATABASE_ID, PROGRESS_LOGS_COLLECTION_ID, [
+    db.listDocuments(PROGRESS_LOGS_COLLECTION_ID, [
       Query.equal("userId", userId),
       Query.orderAsc("loggedAt"),
       Query.limit(500),
@@ -41,7 +40,7 @@ export async function GET() {
   const workoutIds = [...new Set(completions.map((c) => c.workoutId))]
   const caloriesByWorkoutId = new Map<string, number>()
   if (workoutIds.length > 0) {
-    const workoutsResult = await serverDatabases.listDocuments(DATABASE_ID, WORKOUTS_COLLECTION_ID, [
+    const workoutsResult = await db.listDocuments(WORKOUTS_COLLECTION_ID, [
       Query.equal("$id", workoutIds),
       Query.limit(workoutIds.length),
     ])

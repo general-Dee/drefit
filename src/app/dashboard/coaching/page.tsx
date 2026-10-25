@@ -6,7 +6,7 @@ import EmptyState from "@/components/ui/EmptyState"
 import Spinner from "@/components/ui/Spinner"
 import { ChatSkeleton } from "@/components/ui/skeletons"
 import toast from "react-hot-toast"
-import type { CoachingMessageDoc } from "@/lib/appwrite/schema"
+import type { CoachingMessageDoc } from "@/lib/db/schema"
 import CoachWhatsAppButton from "@/components/CoachWhatsAppButton"
 
 export const dynamic = "force-dynamic"

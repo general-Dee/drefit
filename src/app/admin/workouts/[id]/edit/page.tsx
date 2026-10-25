@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import PageHeader from "@/components/ui/PageHeader"
 import toast from "react-hot-toast"
-import type { WorkoutDoc } from "@/lib/appwrite/schema"
+import type { WorkoutDoc } from "@/lib/db/schema"
 import WorkoutForm from "../../WorkoutForm"
 
 export default function EditWorkoutPage({ params }: { params: { id: string } }) {

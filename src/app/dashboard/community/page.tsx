@@ -10,7 +10,7 @@ import Spinner from "@/components/ui/Spinner"
 import { FeedSkeleton } from "@/components/ui/skeletons"
 import { SPRING, reveal } from "@/components/ui/motion"
 import toast from "react-hot-toast"
-import type { CommunityCommentDoc, CommunityPostDoc } from "@/lib/appwrite/schema"
+import type { CommunityCommentDoc, CommunityPostDoc } from "@/lib/db/schema"
 
 export const dynamic = "force-dynamic"
 

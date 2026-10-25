@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID, type UserDoc } from "@/lib/db/schema"
 
 const profileSchema = z.object({
   name: z.string().trim().min(1).max(80),
@@ -14,11 +14,10 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const user = (await serverDatabases.getDocument(
-    DATABASE_ID,
+  const user = (await db.getDocument(
     USERS_COLLECTION_ID,
     session.user.id
-  )) as unknown as AppwriteUserDoc
+  )) as unknown as UserDoc
 
   return NextResponse.json({
     name: user.name,
@@ -39,7 +38,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Please enter a valid name." }, { status: 400 })
   }
 
-  await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, session.user.id, {
+  await db.updateDocument(USERS_COLLECTION_ID, session.user.id, {
     name: parsed.data.name,
   })
 

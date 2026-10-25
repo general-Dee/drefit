@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID, type UserDoc } from "@/lib/db/schema"
 import { normalizePhone } from "@/lib/phone"
 import { DEFAULT_REMINDER_HOUR } from "@/lib/whatsapp/reminders"
 
@@ -15,7 +15,7 @@ const schema = z.object({
 export async function GET() {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const user = (await serverDatabases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, session.user.id)) as unknown as AppwriteUserDoc
+  const user = (await db.getDocument(USERS_COLLECTION_ID, session.user.id)) as unknown as UserDoc
   return NextResponse.json({
     phone: user.phone ?? "",
     whatsappOptIn: user.whatsappOptIn ?? false,
@@ -39,7 +39,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Add your WhatsApp number to turn on reminders." }, { status: 400 })
   }
 
-  await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, session.user.id, {
+  await db.updateDocument(USERS_COLLECTION_ID, session.user.id, {
     phone,
     whatsappOptIn: parsed.data.whatsappOptIn,
     reminderHour: parsed.data.reminderHour,

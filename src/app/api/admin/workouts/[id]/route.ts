@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { requireAdmin } from "@/lib/admin-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, WORKOUTS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { WORKOUTS_COLLECTION_ID } from "@/lib/db/schema"
 
 const exerciseSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -25,8 +25,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  const workout = await serverDatabases
-    .getDocument(DATABASE_ID, WORKOUTS_COLLECTION_ID, params.id)
+  const workout = await db
+    .getDocument(WORKOUTS_COLLECTION_ID, params.id)
     .catch(() => null)
 
   if (!workout) {
@@ -52,8 +52,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Too many exercises — reduce the exercise list." }, { status: 400 })
   }
 
-  const workout = await serverDatabases
-    .updateDocument(DATABASE_ID, WORKOUTS_COLLECTION_ID, params.id, { ...rest, exercisesJson })
+  const workout = await db
+    .updateDocument(WORKOUTS_COLLECTION_ID, params.id, { ...rest, exercisesJson })
     .catch(() => null)
 
   if (!workout) {
@@ -67,7 +67,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  await serverDatabases.deleteDocument(DATABASE_ID, WORKOUTS_COLLECTION_ID, params.id).catch(() => null)
+  await db.deleteDocument(WORKOUTS_COLLECTION_ID, params.id).catch(() => null)
 
   return NextResponse.json({ success: true })
 }

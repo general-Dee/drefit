@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID } from "@/lib/db/schema"
 
 const notificationsSchema = z.object({
   notificationsEnabled: z.boolean(),
@@ -20,7 +20,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 })
   }
 
-  await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, session.user.id, {
+  await db.updateDocument(USERS_COLLECTION_ID, session.user.id, {
     notificationsEnabled: parsed.data.notificationsEnabled,
   })
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import PageHeader from "@/components/ui/PageHeader"
 import toast from "react-hot-toast"
-import type { DietPlanDoc } from "@/lib/appwrite/schema"
+import type { DietPlanDoc } from "@/lib/db/schema"
 import DietPlanForm from "../../DietPlanForm"
 
 export default function EditDietPlanPage({ params }: { params: { id: string } }) {

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { COMMUNITY_POSTS_COLLECTION_ID } from "@/lib/db/schema"
 
 const postSchema = z.object({
   content: z.string().trim().min(1).max(1000),
@@ -14,7 +14,7 @@ export async function GET() {
   if (gate.error) return gate.error
   const session = gate.session
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, [
+  const result = await db.listDocuments(COMMUNITY_POSTS_COLLECTION_ID, [
     Query.orderDesc("createdAt"),
     Query.limit(50),
   ])
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please write something to post." }, { status: 400 })
   }
 
-  const post = await serverDatabases.createDocument(DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, ID.unique(), {
+  const post = await db.createDocument(COMMUNITY_POSTS_COLLECTION_ID, ID.unique(), {
     userId: session.user.id,
     userName: session.user.name ?? "Athlete",
     content: parsed.data.content,

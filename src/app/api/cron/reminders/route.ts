@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { Query } from "node-appwrite"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID, WORKOUT_COMPLETIONS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
+import { Query } from "@/lib/db/query"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID, WORKOUT_COMPLETIONS_COLLECTION_ID, type UserDoc } from "@/lib/db/schema"
 import { isAuthorizedCron } from "@/lib/cron-auth"
 import { lagosDateKey } from "@/lib/lagos-time"
 import { getWhatsAppConfig, PENDING_CONFIG_MESSAGE } from "@/lib/whatsapp/config"
@@ -34,15 +34,15 @@ export async function GET(req: NextRequest) {
   let scanned = 0
 
   do {
-    const page = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+    const page = await db.listDocuments(USERS_COLLECTION_ID, [
       Query.equal("whatsappOptIn", true),
       Query.limit(100),
       ...(cursor ? [Query.cursorAfter(cursor)] : []),
     ])
-    const users = page.documents as unknown as AppwriteUserDoc[]
+    const users = page.documents as unknown as UserDoc[]
     for (const user of users) {
       scanned += 1
-      const completions = await serverDatabases.listDocuments(DATABASE_ID, WORKOUT_COMPLETIONS_COLLECTION_ID, [
+      const completions = await db.listDocuments(WORKOUT_COMPLETIONS_COLLECTION_ID, [
         Query.equal("userId", user.$id),
         Query.orderDesc("completedAt"),
         Query.limit(1),

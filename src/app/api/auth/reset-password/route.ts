@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createHash } from "crypto"
 import { hash } from "bcryptjs"
-import { Query } from "node-appwrite"
+import { Query } from "@/lib/db/query"
 import { z } from "zod"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID } from "@/lib/db/schema"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
 const resetSchema = z.object({
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const tokenHash = createHash("sha256").update(parsed.data.token).digest("hex")
 
   try {
-    const existing = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+    const existing = await db.listDocuments(USERS_COLLECTION_ID, [
       Query.equal("passwordResetTokenHash", tokenHash),
     ])
     const user = existing.documents[0]
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await hash(parsed.data.password, 10)
-    await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, user.$id, {
+    await db.updateDocument(USERS_COLLECTION_ID, user.$id, {
       password: hashedPassword,
       passwordResetTokenHash: "",
       passwordResetExpires: "",

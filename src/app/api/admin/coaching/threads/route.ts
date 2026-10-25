@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server"
-import { Query } from "node-appwrite"
+import { Query } from "@/lib/db/query"
 import { requireAdmin } from "@/lib/admin-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
+import { db } from "@/lib/db/client"
 import {
-  DATABASE_ID,
   USERS_COLLECTION_ID,
   COACHING_MESSAGES_COLLECTION_ID,
-  type AppwriteUserDoc,
+  type UserDoc,
   type CoachingMessageDoc,
-} from "@/lib/appwrite/schema"
+} from "@/lib/db/schema"
 
 export async function GET() {
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, COACHING_MESSAGES_COLLECTION_ID, [
+  const result = await db.listDocuments(COACHING_MESSAGES_COLLECTION_ID, [
     Query.orderDesc("createdAt"),
     Query.limit(500),
   ])
@@ -31,11 +30,11 @@ export async function GET() {
     return NextResponse.json({ threads: [] })
   }
 
-  const users = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+  const users = await db.listDocuments(USERS_COLLECTION_ID, [
     Query.equal("$id", userIds),
   ])
   const namesById = new Map(
-    (users.documents as unknown as AppwriteUserDoc[]).map((u) => [u.$id, u.name])
+    (users.documents as unknown as UserDoc[]).map((u) => [u.$id, u.name])
   )
 
   const threads = userIds

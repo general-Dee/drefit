@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, type CommunityPostDoc } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { COMMUNITY_POSTS_COLLECTION_ID, type CommunityPostDoc } from "@/lib/db/schema"
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const gate = await requireMember()
   if (gate.error) return gate.error
   const session = gate.session
 
-  const post = (await serverDatabases
-    .getDocument(DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, params.id)
+  const post = (await db
+    .getDocument(COMMUNITY_POSTS_COLLECTION_ID, params.id)
     .catch(() => null)) as unknown as CommunityPostDoc | null
 
   if (!post) {
@@ -17,14 +17,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const userId = session.user.id
-  const likedBy = post.likedBy ?? []
-  const nextLikedBy = likedBy.includes(userId)
-    ? likedBy.filter((id) => id !== userId)
-    : [...likedBy, userId]
-
-  const updated = await serverDatabases.updateDocument(DATABASE_ID, COMMUNITY_POSTS_COLLECTION_ID, params.id, {
-    likedBy: nextLikedBy,
-  })
+  const alreadyLiked = (post.likedBy ?? []).includes(userId)
+  // Single atomic UPDATE on the text[] column, so concurrent likes are never lost.
+  const updated = await db.toggleArrayValue(COMMUNITY_POSTS_COLLECTION_ID, params.id, "likedBy", userId, !alreadyLiked)
 
   return NextResponse.json({ success: true, post: updated })
 }

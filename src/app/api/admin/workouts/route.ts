@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { requireAdmin } from "@/lib/admin-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, WORKOUTS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { WORKOUTS_COLLECTION_ID } from "@/lib/db/schema"
 
 const exerciseSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -26,7 +26,7 @@ export async function GET() {
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, WORKOUTS_COLLECTION_ID, [Query.limit(200)])
+  const result = await db.listDocuments(WORKOUTS_COLLECTION_ID, [Query.limit(200)])
   return NextResponse.json({ workouts: result.documents })
 }
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Too many exercises — reduce the exercise list." }, { status: 400 })
   }
 
-  const workout = await serverDatabases.createDocument(DATABASE_ID, WORKOUTS_COLLECTION_ID, ID.unique(), {
+  const workout = await db.createDocument(WORKOUTS_COLLECTION_ID, ID.unique(), {
     ...rest,
     exercisesJson,
   })

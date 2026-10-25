@@ -7,7 +7,7 @@ import EmptyState from "@/components/ui/EmptyState"
 import Spinner from "@/components/ui/Spinner"
 import { ListRowsSkeleton } from "@/components/ui/skeletons"
 import toast from "react-hot-toast"
-import type { WorkoutDoc } from "@/lib/appwrite/schema"
+import type { WorkoutDoc } from "@/lib/db/schema"
 
 export const dynamic = "force-dynamic"
 

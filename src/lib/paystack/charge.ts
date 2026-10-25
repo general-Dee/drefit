@@ -1,12 +1,11 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto"
-import { Query } from "node-appwrite"
-import { serverDatabases } from "@/lib/appwrite/server"
+import { Query } from "@/lib/db/query"
+import { db } from "@/lib/db/client"
 import {
-  DATABASE_ID,
   PAYMENT_EVENTS_COLLECTION_ID,
   USERS_COLLECTION_ID,
-  type AppwriteUserDoc,
-} from "@/lib/appwrite/schema"
+  type UserDoc,
+} from "@/lib/db/schema"
 import { PLAN_AMOUNT_KOBO, PLAN_CURRENCY, PLAN_PERIOD_DAYS } from "@/lib/paystack/plan"
 import { rewardReferralOnFirstCharge } from "@/lib/referrals"
 
@@ -90,19 +89,19 @@ export async function fetchVerifiedTransaction(reference: string): Promise<Payst
   return body.data as PaystackTransaction
 }
 
-export async function findUser(tx: PaystackTransaction): Promise<AppwriteUserDoc | null> {
+export async function findUser(tx: PaystackTransaction): Promise<UserDoc | null> {
   const id = metadataUserId(tx.metadata)
   if (id) {
-    const doc = await serverDatabases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, id).catch((err) => {
+    const doc = await db.getDocument(USERS_COLLECTION_ID, id).catch((err) => {
       if ((err as { code?: number })?.code === 404) return null
       throw err
     })
-    if (doc) return doc as unknown as AppwriteUserDoc
+    if (doc) return doc as unknown as UserDoc
   }
   const email = tx.customer?.email
   if (!email) return null
-  const res = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [Query.equal("email", email), Query.limit(1)])
-  return (res.documents[0] as unknown as AppwriteUserDoc) ?? null
+  const res = await db.listDocuments(USERS_COLLECTION_ID, [Query.equal("email", email), Query.limit(1)])
+  return (res.documents[0] as unknown as UserDoc) ?? null
 }
 
 export type ApplyResult =
@@ -134,7 +133,7 @@ export async function applyVerifiedCharge(
   const eventId = paymentEventId(tx.reference)
 
   try {
-    await serverDatabases.createDocument(DATABASE_ID, PAYMENT_EVENTS_COLLECTION_ID, eventId, {
+    await db.createDocument(PAYMENT_EVENTS_COLLECTION_ID, eventId, {
       reference: tx.reference,
       userId: user.$id,
       amount: Number(tx.amount),
@@ -153,13 +152,13 @@ export async function applyVerifiedCharge(
   }
 
   try {
-    await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, user.$id, {
+    await db.updateDocument(USERS_COLLECTION_ID, user.$id, {
       subscriptionStatus: "active",
       subscriptionId: tx.reference,
       subscriptionCurrentPeriodEnd: periodEnd,
     })
   } catch (err) {
-    await serverDatabases.deleteDocument(DATABASE_ID, PAYMENT_EVENTS_COLLECTION_ID, eventId).catch((e) =>
+    await db.deleteDocument(PAYMENT_EVENTS_COLLECTION_ID, eventId).catch((e) =>
       console.error("failed to release payment claim", tx.reference, e)
     )
     throw err

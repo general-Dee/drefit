@@ -1,6 +1,6 @@
 import { createHash } from "crypto"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, LOGIN_ATTEMPTS_COLLECTION_ID, type LoginAttemptDoc } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { LOGIN_ATTEMPTS_COLLECTION_ID, type LoginAttemptDoc } from "@/lib/db/schema"
 
 // Persistent (Appwrite-backed) login throttling, so limits survive cold starts
 // and are shared across serverless instances. Failures are counted for every
@@ -67,7 +67,7 @@ function toState(doc: LoginAttemptDoc): AttemptState {
 
 async function load(id: string): Promise<LoginAttemptDoc | null> {
   try {
-    return (await serverDatabases.getDocument(DATABASE_ID, LOGIN_ATTEMPTS_COLLECTION_ID, id)) as unknown as LoginAttemptDoc
+    return (await db.getDocument(LOGIN_ATTEMPTS_COLLECTION_ID, id)) as unknown as LoginAttemptDoc
   } catch (err) {
     if ((err as { code?: number })?.code === 404) return null
     throw err
@@ -99,12 +99,12 @@ export async function recordLoginFailure(ip: string, email: string, now = Date.n
           windowStart: new Date(next.windowStart).toISOString(),
           lockedUntil: next.lockedUntil ? new Date(next.lockedUntil).toISOString() : null,
         }
-        if (doc) await serverDatabases.updateDocument(DATABASE_ID, LOGIN_ATTEMPTS_COLLECTION_ID, id, data)
+        if (doc) await db.updateDocument(LOGIN_ATTEMPTS_COLLECTION_ID, id, data)
         else
-          await serverDatabases.createDocument(DATABASE_ID, LOGIN_ATTEMPTS_COLLECTION_ID, id, data).catch(async (err) => {
+          await db.createDocument(LOGIN_ATTEMPTS_COLLECTION_ID, id, data).catch(async (err) => {
             // Lost a creation race with a concurrent attempt: update instead.
             if ((err as { code?: number })?.code !== 409) throw err
-            await serverDatabases.updateDocument(DATABASE_ID, LOGIN_ATTEMPTS_COLLECTION_ID, id, data)
+            await db.updateDocument(LOGIN_ATTEMPTS_COLLECTION_ID, id, data)
           })
       })
     )
@@ -117,7 +117,7 @@ export async function recordLoginFailure(ip: string, email: string, now = Date.n
 // left to expire so a distributed attack can't be reset by one valid login).
 export async function clearLoginFailures(ip: string, email: string): Promise<void> {
   const id = attemptDocId("ip_email", `${ip}|${normalizeEmail(email)}`)
-  await serverDatabases.deleteDocument(DATABASE_ID, LOGIN_ATTEMPTS_COLLECTION_ID, id).catch((err) => {
+  await db.deleteDocument(LOGIN_ATTEMPTS_COLLECTION_ID, id).catch((err) => {
     if ((err as { code?: number })?.code !== 404) console.error("login throttle clear failed", err)
   })
 }

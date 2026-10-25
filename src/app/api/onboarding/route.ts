@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID } from "@/lib/db/schema"
 import { LIMITATIONS } from "@/lib/first-week-plan"
 import { generateAndSaveFirstWeek } from "@/lib/first-week-store"
 import { lagosDateKey } from "@/lib/lagos-time"
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   const a = parsed.data
   const limitations = [...new Set(a.limitations)]
 
-  await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, session.user.id, {
+  await db.updateDocument(USERS_COLLECTION_ID, session.user.id, {
     fitnessGoal: a.fitnessGoal,
     fitnessLevel: a.fitnessLevel,
     dietaryPreference: a.dietaryPreference,

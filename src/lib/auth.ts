@@ -4,10 +4,10 @@ import Google from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare, hash } from "bcryptjs"
 import { randomUUID } from "crypto"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { z } from "zod"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID, type AppwriteUserDoc } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID, type UserDoc } from "@/lib/db/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { isLoginLocked, recordLoginFailure, clearLoginFailures } from "@/lib/login-throttle"
@@ -27,16 +27,16 @@ class RateLimitedSignin extends CredentialsSignin {
   static type = "RateLimited"
 }
 
-async function findUserByEmail(email: string): Promise<AppwriteUserDoc | undefined> {
-  const result = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+async function findUserByEmail(email: string): Promise<UserDoc | undefined> {
+  const result = await db.listDocuments(USERS_COLLECTION_ID, [
     Query.equal("email", email),
   ])
-  return result.documents[0] as unknown as AppwriteUserDoc | undefined
+  return result.documents[0] as unknown as UserDoc | undefined
 }
 
 // Google sign-in has no registration step, so provision a trialing account
 // the first time a given Google email signs in.
-async function findOrCreateGoogleUser(email: string, name: string): Promise<AppwriteUserDoc> {
+async function findOrCreateGoogleUser(email: string, name: string): Promise<UserDoc> {
   const existing = await findUserByEmail(email)
   if (existing) return existing
 
@@ -49,7 +49,7 @@ async function findOrCreateGoogleUser(email: string, name: string): Promise<Appw
   } catch {
     referredBy = null
   }
-  const doc = await serverDatabases.createDocument(DATABASE_ID, USERS_COLLECTION_ID, ID.unique(), {
+  const doc = await db.createDocument(USERS_COLLECTION_ID, ID.unique(), {
     name,
     email,
     password: unusablePassword,
@@ -59,7 +59,7 @@ async function findOrCreateGoogleUser(email: string, name: string): Promise<Appw
     referralCode: generateReferralCode(),
     ...(referredBy ? { referredBy } : {}),
   })
-  return doc as unknown as AppwriteUserDoc
+  return doc as unknown as UserDoc
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { Check, Plus, X } from "lucide-react"
 import Spinner from "@/components/ui/Spinner"
 import toast from "react-hot-toast"
-import type { Exercise, WorkoutDoc } from "@/lib/appwrite/schema"
+import type { Exercise, WorkoutDoc } from "@/lib/db/schema"
 
 const EMPTY_EXERCISE: Exercise = { name: "", sets: 3, reps: 10, rest: 30 }
 

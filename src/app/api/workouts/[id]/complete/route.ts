@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { ID, Permission, Role } from "node-appwrite"
+import { ID } from "@/lib/db/query"
 import { z } from "zod"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, WORKOUT_COMPLETIONS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { WORKOUT_COMPLETIONS_COLLECTION_ID } from "@/lib/db/schema"
 import { resolveCompletedAt } from "@/lib/completion-time"
 
 // Optional body from the offline queue: a client-generated id (used as the
@@ -26,16 +26,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const userId = session.user.id
   try {
-    const completion = await serverDatabases.createDocument(
-      DATABASE_ID,
+    const completion = await db.createDocument(
       WORKOUT_COMPLETIONS_COLLECTION_ID,
       body.clientId ?? ID.unique(),
       {
         userId,
         workoutId: params.id,
         completedAt: resolveCompletedAt(body.completedAt, new Date()),
-      },
-      [Permission.read(Role.user(userId)), Permission.write(Role.user(userId))]
+      }
     )
     return NextResponse.json({ success: true, completion })
   } catch (err) {

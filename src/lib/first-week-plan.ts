@@ -2,7 +2,7 @@
 // selects and schedules existing coach-created workouts and diet plans using
 // fixed rules (no AI involved).
 import { addDaysToKey } from "@/lib/lagos-time"
-import type { DietaryPreference, FitnessGoal, FitnessLevel } from "@/lib/appwrite/schema"
+import type { DietaryPreference, FitnessGoal, FitnessLevel } from "@/lib/db/schema"
 
 export const PLAN_RULES_VERSION = 1
 

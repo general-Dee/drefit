@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { hash } from "bcryptjs"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { z } from "zod"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { USERS_COLLECTION_ID } from "@/lib/db/schema"
 import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { isAdminEmail } from "@/lib/admin"
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const { name, email, password, ref } = parsed.data
 
   try {
-    const existing = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+    const existing = await db.listDocuments(USERS_COLLECTION_ID, [
       Query.equal("email", email),
     ])
     if (existing.documents.length > 0) {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await hash(password, 10)
     const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString()
 
-    await serverDatabases.createDocument(DATABASE_ID, USERS_COLLECTION_ID, ID.unique(), {
+    await db.createDocument(USERS_COLLECTION_ID, ID.unique(), {
       name,
       email,
       password: hashedPassword,

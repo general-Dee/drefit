@@ -5,7 +5,7 @@ import PageHeader from "@/components/ui/PageHeader"
 import EmptyState from "@/components/ui/EmptyState"
 import Skeleton from "@/components/ui/Skeleton"
 import toast from "react-hot-toast"
-import type { DietPlanDoc } from "@/lib/appwrite/schema"
+import type { DietPlanDoc } from "@/lib/db/schema"
 
 export const dynamic = "force-dynamic"
 

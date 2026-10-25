@@ -5,7 +5,7 @@ import { Search, SearchX, Clock, Flame, ChevronRight, Dumbbell } from "lucide-re
 import PageHeader from "@/components/ui/PageHeader"
 import EmptyState from "@/components/ui/EmptyState"
 import { WorkoutCardsSkeleton } from "@/components/ui/skeletons"
-import type { WorkoutDoc } from "@/lib/appwrite/schema"
+import type { WorkoutDoc } from "@/lib/db/schema"
 
 export const dynamic = "force-dynamic"
 

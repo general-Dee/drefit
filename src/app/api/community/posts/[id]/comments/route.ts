@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, COMMUNITY_COMMENTS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { COMMUNITY_COMMENTS_COLLECTION_ID } from "@/lib/db/schema"
 
 const commentSchema = z.object({
   content: z.string().trim().min(1).max(500),
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   if (gate.error) return gate.error
   const session = gate.session
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, COMMUNITY_COMMENTS_COLLECTION_ID, [
+  const result = await db.listDocuments(COMMUNITY_COMMENTS_COLLECTION_ID, [
     Query.equal("postId", params.id),
     Query.orderAsc("createdAt"),
     Query.limit(200),
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: "Please write a comment." }, { status: 400 })
   }
 
-  const comment = await serverDatabases.createDocument(DATABASE_ID, COMMUNITY_COMMENTS_COLLECTION_ID, ID.unique(), {
+  const comment = await db.createDocument(COMMUNITY_COMMENTS_COLLECTION_ID, ID.unique(), {
     postId: params.id,
     userId: session.user.id,
     userName: session.user.name ?? "Athlete",

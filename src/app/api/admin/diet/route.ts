@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { requireAdmin } from "@/lib/admin-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, DIET_PLANS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { DIET_PLANS_COLLECTION_ID } from "@/lib/db/schema"
 
 const dietPlanSchema = z.object({
   dietaryPreference: z.enum(["omnivore", "vegetarian", "keto", "halal"]),
@@ -18,7 +18,7 @@ export async function GET() {
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, DIET_PLANS_COLLECTION_ID, [Query.limit(200)])
+  const result = await db.listDocuments(DIET_PLANS_COLLECTION_ID, [Query.limit(200)])
   return NextResponse.json({ plans: result.documents })
 }
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please check the diet plan fields." }, { status: 400 })
   }
 
-  const existing = await serverDatabases.listDocuments(DATABASE_ID, DIET_PLANS_COLLECTION_ID, [
+  const existing = await db.listDocuments(DIET_PLANS_COLLECTION_ID, [
     Query.equal("dietaryPreference", parsed.data.dietaryPreference),
     Query.equal("day", parsed.data.day),
     Query.limit(1),
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const plan = await serverDatabases.createDocument(DATABASE_ID, DIET_PLANS_COLLECTION_ID, ID.unique(), parsed.data)
+  const plan = await db.createDocument(DIET_PLANS_COLLECTION_ID, ID.unique(), parsed.data)
 
   return NextResponse.json({ success: true, plan })
 }

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 import { Apple, Check, Coffee, Moon, Sun } from "lucide-react"
 import Spinner from "@/components/ui/Spinner"
-import type { DietPlanDoc } from "@/lib/appwrite/schema"
+import type { DietPlanDoc } from "@/lib/db/schema"
 
 export default function DietPlanForm({ initialPlan }: { initialPlan?: DietPlanDoc }) {
   const router = useRouter()

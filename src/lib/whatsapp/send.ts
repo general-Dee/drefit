@@ -1,6 +1,6 @@
 import { createHash } from "crypto"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, REMINDER_LOG_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db as serverDb } from "@/lib/db/client"
+import { REMINDER_LOG_COLLECTION_ID } from "@/lib/db/schema"
 import { toWhatsAppDigits } from "@/lib/phone"
 import { getWhatsAppConfig, PENDING_CONFIG_MESSAGE, type ReminderType, type WhatsAppConfig } from "./config"
 import type { PlannedReminder } from "./reminders"
@@ -45,7 +45,7 @@ export async function sendTemplateMessage(
 export async function sendReminderOnce(
   user: { $id: string; phone?: string | null },
   reminder: PlannedReminder,
-  deps: { env?: NodeJS.ProcessEnv; fetchImpl?: FetchLike; db?: typeof serverDatabases } = {}
+  deps: { env?: NodeJS.ProcessEnv; fetchImpl?: FetchLike; db?: typeof serverDb } = {}
 ): Promise<SendResult> {
   const cfg = getWhatsAppConfig(deps.env ?? process.env)
   if (!cfg) {
@@ -53,10 +53,10 @@ export async function sendReminderOnce(
     return "pending_config"
   }
   if (!user.phone) return "failed"
-  const db = deps.db ?? serverDatabases
+  const db = deps.db ?? serverDb
   const id = reminderLogId(user.$id, reminder.dedupeType, reminder.day)
   try {
-    await db.createDocument(DATABASE_ID, REMINDER_LOG_COLLECTION_ID, id, {
+    await db.createDocument(REMINDER_LOG_COLLECTION_ID, id, {
       userId: user.$id,
       type: reminder.dedupeType,
       day: reminder.day,
@@ -69,12 +69,12 @@ export async function sendReminderOnce(
   }
   try {
     await sendTemplateMessage(cfg, user.phone, reminder.type, reminder.params, deps.fetchImpl)
-    await db.updateDocument(DATABASE_ID, REMINDER_LOG_COLLECTION_ID, id, { status: "sent" }).catch(() => {})
+    await db.updateDocument(REMINDER_LOG_COLLECTION_ID, id, { status: "sent" }).catch(() => {})
     return "sent"
   } catch (err) {
     console.error(`whatsapp send failed for ${user.$id} ${reminder.dedupeType}`, err)
     // Release the claim so a later run can retry today.
-    await db.deleteDocument(DATABASE_ID, REMINDER_LOG_COLLECTION_ID, id).catch(() => {})
+    await db.deleteDocument(REMINDER_LOG_COLLECTION_ID, id).catch(() => {})
     return "failed"
   }
 }

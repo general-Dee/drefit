@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ID, Query } from "node-appwrite"
+import { ID, Query } from "@/lib/db/query"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, COACHING_MESSAGES_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { COACHING_MESSAGES_COLLECTION_ID } from "@/lib/db/schema"
 
 const messageSchema = z.object({
   content: z.string().trim().min(1).max(2000),
@@ -14,7 +14,7 @@ export async function GET() {
   if (gate.error) return gate.error
   const session = gate.session
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, COACHING_MESSAGES_COLLECTION_ID, [
+  const result = await db.listDocuments(COACHING_MESSAGES_COLLECTION_ID, [
     Query.equal("userId", session.user.id),
     Query.orderAsc("createdAt"),
     Query.limit(200),
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please write a message." }, { status: 400 })
   }
 
-  const message = await serverDatabases.createDocument(DATABASE_ID, COACHING_MESSAGES_COLLECTION_ID, ID.unique(), {
+  const message = await db.createDocument(COACHING_MESSAGES_COLLECTION_ID, ID.unique(), {
     userId: session.user.id,
     senderId: session.user.id,
     senderName: session.user.name ?? "Athlete",

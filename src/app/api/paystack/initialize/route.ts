@@ -1,8 +1,9 @@
-﻿import { NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
+import { appOrigin } from "@/lib/app-url"
 import { auth } from "@/lib/auth"
 import { PLAN_AMOUNT_KOBO, PLAN_CURRENCY } from "@/lib/paystack/plan"
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const session = await auth()
 
   if (!session?.user?.email || !session.user.id) {
@@ -20,7 +21,7 @@ export async function POST() {
       amount: PLAN_AMOUNT_KOBO,
       currency: PLAN_CURRENCY,
       // Redirect-flow fallback: /subscription verifies ?reference= server-side.
-      callback_url: `${process.env.NEXTAUTH_URL}/subscription`,
+      callback_url: `${appOrigin(req)}/subscription`,
       // Lets the webhook/verify path match the payer to the account reliably.
       metadata: { userId: session.user.id },
     }),

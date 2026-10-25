@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { randomBytes, createHash } from "crypto"
-import { Query } from "node-appwrite"
+import { Query } from "@/lib/db/query"
 import { z } from "zod"
-import { serverDatabases } from "@/lib/appwrite/server"
-import { DATABASE_ID, USERS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { db } from "@/lib/db/client"
+import { appOrigin } from "@/lib/app-url"
+import { USERS_COLLECTION_ID } from "@/lib/db/schema"
 import { sendPasswordResetEmail } from "@/lib/resend/password-reset"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const existing = await serverDatabases.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+    const existing = await db.listDocuments(USERS_COLLECTION_ID, [
       Query.equal("email", parsed.data.email),
     ])
     const user = existing.documents[0]
@@ -37,12 +38,12 @@ export async function POST(req: NextRequest) {
       const tokenHash = createHash("sha256").update(rawToken).digest("hex")
       const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString()
 
-      await serverDatabases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, user.$id, {
+      await db.updateDocument(USERS_COLLECTION_ID, user.$id, {
         passwordResetTokenHash: tokenHash,
         passwordResetExpires: expires,
       })
 
-      const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${rawToken}`
+      const resetUrl = `${appOrigin(req)}/reset-password?token=${rawToken}`
       await sendPasswordResetEmail(parsed.data.email, resetUrl).catch((err) => {
         console.error("password reset email failed", err)
       })

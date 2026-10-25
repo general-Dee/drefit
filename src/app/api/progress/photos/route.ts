@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { ID, Permission, Query, Role } from "node-appwrite"
-import { InputFile } from "node-appwrite/file"
+import { ID, Query } from "@/lib/db/query"
 import { requireMember } from "@/lib/member-guard"
-import { serverDatabases, serverStorage } from "@/lib/appwrite/server"
-import { DATABASE_ID, PROGRESS_PHOTOS_BUCKET_ID, PROGRESS_PHOTOS_COLLECTION_ID } from "@/lib/appwrite/schema"
-
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024
+import { db } from "@/lib/db/client"
+import { PROGRESS_PHOTOS_COLLECTION_ID } from "@/lib/db/schema"
+import { MAX_PHOTO_BYTES, photoPathname, photoStorageConfigured, storePhoto } from "@/lib/photo-storage"
 
 export async function POST(req: NextRequest) {
   const gate = await requireMember()
@@ -23,31 +21,24 @@ export async function POST(req: NextRequest) {
   if (file.size > MAX_PHOTO_BYTES) {
     return NextResponse.json({ error: "Please upload an image under 5MB." }, { status: 400 })
   }
+  if (!photoStorageConfigured()) {
+    console.error("progress photo upload: BLOB_READ_WRITE_TOKEN is not set")
+    return NextResponse.json({ error: "Photo storage is not configured." }, { status: 503 })
+  }
 
   const userId = session.user.id
+  const fileId = ID.unique()
+  const pathname = photoPathname(userId, fileId, file.type)
   const buffer = Buffer.from(await file.arrayBuffer())
-  const inputFile = InputFile.fromBuffer(buffer, file.name)
+  await storePhoto(pathname, buffer, file.type)
 
-  const uploaded = await serverStorage.createFile(
-    {
-      bucketId: PROGRESS_PHOTOS_BUCKET_ID,
-      fileId: ID.unique(),
-      file: inputFile,
-      permissions: [Permission.read(Role.user(userId)), Permission.write(Role.user(userId))],
-    }
-  )
-
-  const photo = await serverDatabases.createDocument(
-    DATABASE_ID,
-    PROGRESS_PHOTOS_COLLECTION_ID,
-    ID.unique(),
-    {
-      userId,
-      fileId: uploaded.$id,
-      takenAt: new Date().toISOString(),
-    },
-    [Permission.read(Role.user(userId)), Permission.write(Role.user(userId))]
-  )
+  const photo = await db.createDocument(PROGRESS_PHOTOS_COLLECTION_ID, ID.unique(), {
+    userId,
+    fileId,
+    takenAt: new Date().toISOString(),
+    blobPathname: pathname,
+    contentType: file.type,
+  })
 
   return NextResponse.json({ success: true, photo })
 }
@@ -57,7 +48,7 @@ export async function GET() {
   if (gate.error) return gate.error
   const session = gate.session
 
-  const result = await serverDatabases.listDocuments(DATABASE_ID, PROGRESS_PHOTOS_COLLECTION_ID, [
+  const result = await db.listDocuments(PROGRESS_PHOTOS_COLLECTION_ID, [
     Query.equal("userId", session.user.id),
     Query.orderDesc("takenAt"),
     Query.limit(20),

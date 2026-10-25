@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
 
   const response = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
+    cache: "no-store", // never reuse a cached Paystack session from Next's data cache
     headers: {
       Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
       "Content-Type": "application/json",

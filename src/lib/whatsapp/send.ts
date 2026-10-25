@@ -22,6 +22,9 @@ export async function sendTemplateMessage(
 ): Promise<void> {
   const res = await fetchImpl(`https://graph.facebook.com/${cfg.apiVersion}/${cfg.phoneNumberId}/messages`, {
     method: "POST",
+    // Next's data cache would otherwise replay an identical earlier send
+    // (same user/template/params) without contacting WhatsApp.
+    cache: "no-store",
     headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       messaging_product: "whatsapp",

@@ -3,28 +3,28 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const { store, db } = vi.hoisted(() => {
   const store = new Map<string, Record<string, unknown>>()
   const db = {
-  getDocument: vi.fn(async (_d: string, _c: string, id: string) => {
+  getDocument: vi.fn(async (_c: string, id: string) => {
     const doc = store.get(id)
     if (!doc) throw { code: 404 }
     return { $id: id, ...doc }
   }),
-  createDocument: vi.fn(async (_d: string, _c: string, id: string, data: Record<string, unknown>) => {
+  createDocument: vi.fn(async (_c: string, id: string, data: Record<string, unknown>) => {
     if (store.has(id)) throw { code: 409 }
     store.set(id, data)
     return data
   }),
-  updateDocument: vi.fn(async (_d: string, _c: string, id: string, data: Record<string, unknown>) => {
+  updateDocument: vi.fn(async (_c: string, id: string, data: Record<string, unknown>) => {
     store.set(id, { ...store.get(id), ...data })
     return data
   }),
-  deleteDocument: vi.fn(async (_d: string, _c: string, id: string) => {
+  deleteDocument: vi.fn(async (_c: string, id: string) => {
     if (!store.delete(id)) throw { code: 404 }
     return {}
   }),
 }
   return { store, db }
 })
-vi.mock("@/lib/appwrite/server", () => ({ serverDatabases: db }))
+vi.mock("@/lib/db/client", () => ({ db }))
 
 import {
   EMAIL_POLICY,
@@ -57,7 +57,7 @@ describe("recordFailureState", () => {
   })
 })
 
-describe("Appwrite-backed lockout", () => {
+describe("Database-backed lockout", () => {
   beforeEach(() => store.clear())
 
   it("locks an ip+email after 5 failures, the same for registered and unknown emails", async () => {

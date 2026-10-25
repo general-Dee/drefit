@@ -1,23 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 
 const db = vi.hoisted(() => {
-  process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID = "testdb"
   const docs = new Map<string, unknown>()
   return {
     docs,
-    createDocument: vi.fn(async (_d: string, _c: string, id: string, data: unknown) => {
+    createDocument: vi.fn(async (_c: string, id: string, data: unknown) => {
       if (docs.has(id)) throw { code: 409 }
       docs.set(id, data)
       return data
     }),
     updateDocument: vi.fn(async () => ({})),
-    deleteDocument: vi.fn(async (_d: string, _c: string, id: string) => {
+    deleteDocument: vi.fn(async (_c: string, id: string) => {
       docs.delete(id)
       return {}
     }),
   }
 })
-vi.mock("@/lib/appwrite/server", () => ({ serverDatabases: db }))
+vi.mock("@/lib/db/client", () => ({ db }))
 
 import { planReminders, paymentFailedReminder, type ReminderUser } from "./reminders"
 import { sendReminderOnce, reminderLogId } from "./send"

@@ -10,7 +10,7 @@ import {
 } from "./first-week-plan"
 
 const ex = (...names: string[]) => JSON.stringify(names.map((name) => ({ name, sets: 3, reps: 10, rest: 60 })))
-// Mirrors the seeded library in scripts/seed-appwrite.mjs.
+// Mirrors the seeded library in scripts/seed-db.mjs.
 const LIBRARY: PlanWorkoutInput[] = [
   { $id: "w1", name: "Upper Body Strength", muscleGroup: "Upper Body", duration: 45, difficulty: "intermediate", goal: "muscle-gain", exercisesJson: ex("Push-Ups", "Dumbbell Press", "Incline Push-Ups") },
   { $id: "w2", name: "Leg Day Blast", muscleGroup: "Lower Body", duration: 50, difficulty: "advanced", goal: "muscle-gain", exercisesJson: ex("Squats", "Lunges", "Leg Press") },

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createHmac } from "crypto"
 
 const db = vi.hoisted(() => {
-  process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID = "testdb"
   return {
     getDocument: vi.fn(),
     listDocuments: vi.fn(),
@@ -11,7 +10,7 @@ const db = vi.hoisted(() => {
     deleteDocument: vi.fn(),
   }
 })
-vi.mock("@/lib/appwrite/server", () => ({ serverDatabases: db }))
+vi.mock("@/lib/db/client", () => ({ db }))
 
 import {
   applyVerifiedCharge,
@@ -87,7 +86,7 @@ describe("helpers", () => {
     expect(computePeriodEnd(paid, "active", end).toISOString()).toBe(new Date(new Date(end).getTime() + 30 * DAY).toISOString())
     expect(computePeriodEnd(paid, "inactive", end).toISOString()).toBe(new Date(paid.getTime() + 30 * DAY).toISOString())
   })
-  it("derives a stable Appwrite-safe id per reference", () => {
+  it("derives a stable id-safe per reference", () => {
     expect(paymentEventId("x")).toBe(paymentEventId("x"))
     expect(paymentEventId("x")).not.toBe(paymentEventId("y"))
     expect(paymentEventId("x")).toMatch(/^[a-f0-9]{36}$/)
@@ -112,8 +111,8 @@ describe("applyVerifiedCharge", () => {
   it("activates the user matched by metadata and records the reference", async () => {
     const r = await applyVerifiedCharge(tx(), "webhook")
     expect(r.status).toBe("activated")
-    expect(db.createDocument).toHaveBeenCalledWith("testdb", "paymentEvents", paymentEventId("ref_123"), expect.objectContaining({ reference: "ref_123", userId: "user1", amount: 500000 }))
-    expect(db.updateDocument).toHaveBeenCalledWith("testdb", "users", "user1", expect.objectContaining({ subscriptionStatus: "active", subscriptionId: "ref_123" }))
+    expect(db.createDocument).toHaveBeenCalledWith("paymentEvents", paymentEventId("ref_123"), expect.objectContaining({ reference: "ref_123", userId: "user1", amount: 500000 }))
+    expect(db.updateDocument).toHaveBeenCalledWith("users", "user1", expect.objectContaining({ subscriptionStatus: "active", subscriptionId: "ref_123" }))
   })
 
   it("falls back to customer email when metadata has no user", async () => {
@@ -150,8 +149,8 @@ describe("applyVerifiedCharge", () => {
   })
 
   it("releases the idempotency claim if the user update fails", async () => {
-    db.updateDocument.mockRejectedValue(new Error("appwrite down"))
-    await expect(applyVerifiedCharge(tx(), "webhook")).rejects.toThrow("appwrite down")
-    expect(db.deleteDocument).toHaveBeenCalledWith("testdb", "paymentEvents", paymentEventId("ref_123"))
+    db.updateDocument.mockRejectedValue(new Error("database down"))
+    await expect(applyVerifiedCharge(tx(), "webhook")).rejects.toThrow("database down")
+    expect(db.deleteDocument).toHaveBeenCalledWith("paymentEvents", paymentEventId("ref_123"))
   })
 })

@@ -37,7 +37,7 @@ describe("offline completion queue", () => {
     expect(await flushQueue(s, ok)).toEqual({ synced: 2, remaining: 0 })
   })
 
-  it("client ids are valid Appwrite document ids", () => {
+  it("client ids are valid document ids (Appwrite-compatible)", () => {
     const id = newClientId(() => "123e4567-e89b-12d3-a456-426614174000")
     expect(id).toMatch(/^c[a-f0-9]{1,35}$/)
     expect(id.length).toBeLessThanOrEqual(36)

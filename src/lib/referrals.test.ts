@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const db = vi.hoisted(() => {
-  process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID = "testdb"
   const tables = new Map<string, Map<string, Record<string, unknown>>>()
   const t = (c: string) => {
     if (!tables.has(c)) tables.set(c, new Map())
@@ -11,34 +10,36 @@ const db = vi.hoisted(() => {
     tables,
     t,
     failNextUserUpdateFor: null as string | null,
-    getDocument: vi.fn(async (_d: string, c: string, id: string) => {
+    getDocument: vi.fn(async (c: string, id: string) => {
       const doc = t(c).get(id)
       if (!doc) throw { code: 404 }
       return { $id: id, ...doc }
     }),
-    createDocument: vi.fn(async (_d: string, c: string, id: string, data: Record<string, unknown>) => {
+    createDocument: vi.fn(async (c: string, id: string, data: Record<string, unknown>) => {
       if (t(c).has(id)) throw { code: 409 }
       t(c).set(id, { ...data })
       return { $id: id, ...data }
     }),
-    updateDocument: vi.fn(async (_d: string, c: string, id: string, data: Record<string, unknown>) => {
+    updateDocument: vi.fn(async (c: string, id: string, data: Record<string, unknown>) => {
       if (c === "users" && db.failNextUserUpdateFor === id) {
         db.failNextUserUpdateFor = null
-        throw new Error("appwrite down")
+        throw new Error("database down")
       }
       t(c).set(id, { ...t(c).get(id), ...data })
       return { $id: id, ...t(c).get(id) }
     }),
-    listDocuments: vi.fn(async (_d: string, c: string, queries: string[]) => {
-      const filters = queries.map((q) => JSON.parse(q)).filter((q) => q.method === "equal")
+    listDocuments: vi.fn(async (c: string, queries: { op: string; field?: string; value?: unknown }[]) => {
+      const filters = queries.filter((q) => q.op === "equal")
       const docs = [...t(c).entries()]
         .map(([id, d]) => ({ $id: id, ...d }))
-        .filter((d) => filters.every((f) => (f.values as unknown[]).includes((d as Record<string, unknown>)[f.attribute])))
+        .filter((d) =>
+          filters.every((f) => (Array.isArray(f.value) ? f.value : [f.value]).includes((d as Record<string, unknown>)[f.field!]))
+        )
       return { total: docs.length, documents: docs }
     }),
   }
 })
-vi.mock("@/lib/appwrite/server", () => ({ serverDatabases: db }))
+vi.mock("@/lib/db/client", () => ({ db }))
 
 import {
   extendedAccess,
@@ -49,7 +50,7 @@ import {
   rewardReferralOnFirstCharge,
   selfReferralReason,
 } from "./referrals"
-import type { AppwriteUserDoc } from "@/lib/appwrite/schema"
+import type { UserDoc } from "@/lib/db/schema"
 
 const NOW = new Date("2026-10-17T10:00:00Z")
 const DAY = 86_400_000
@@ -99,7 +100,7 @@ describe("resolveReferrerId at signup", () => {
 })
 
 describe("self-referral checks", () => {
-  const u = (o: Partial<AppwriteUserDoc>) => ({ $id: "a", name: "", email: "a@x.com", password: "", ...o }) as AppwriteUserDoc
+  const u = (o: Partial<UserDoc>) => ({ $id: "a", name: "", email: "a@x.com", password: "", ...o }) as UserDoc
   it("flags same id, email or phone", () => {
     expect(selfReferralReason(u({}), u({}))).toBe("self_referral")
     expect(selfReferralReason(u({}), u({ $id: "b", email: "A@X.com" }))).toBe("same_email")
@@ -109,7 +110,7 @@ describe("self-referral checks", () => {
 })
 
 describe("extendedAccess", () => {
-  const base = { $id: "x", name: "", email: "", password: "" } as AppwriteUserDoc
+  const base = { $id: "x", name: "", email: "", password: "" } as UserDoc
   it("extends an active period from its end", () => {
     const r = extendedAccess({ ...base, subscriptionStatus: "active", subscriptionCurrentPeriodEnd: iso(NOW.getTime() + 5 * DAY) }, 30, NOW)
     expect(r.subscriptionCurrentPeriodEnd).toBe(iso(NOW.getTime() + 35 * DAY))

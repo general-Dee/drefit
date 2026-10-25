@@ -39,7 +39,11 @@ module.exports = {
         display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
         body: ["var(--font-body)", "ui-sans-serif", "system-ui", "sans-serif"],
         sans: ["var(--font-body)", "ui-sans-serif", "system-ui", "sans-serif"],
+        accent: ["var(--font-accent)", "ui-serif", "Georgia", "serif"],
       },
+      // Marketing spacing rhythm (8px grid): section = 96/128px, gutter = 24/32px.
+      spacing: { 18: "4.5rem", 22: "5.5rem", 30: "7.5rem" },
+      maxWidth: { prose: "38rem", shell: "76rem" },
       fontSize: {
         // tight type scale (1.25 ratio) with matched line heights
         xs: ["0.75rem", { lineHeight: "1rem" }],

@@ -149,7 +149,7 @@ export default function SettingsPage() {
             <span className="icon-tile"><Bell className="h-[18px] w-[18px]" /></span>
             <div className="min-w-0 flex-1">
               <h2 className="text-base">Notifications</h2>
-              <p className="text-sm text-ink-muted">Updates from Drefit and your coach.</p>
+              <p className="text-sm text-ink-muted">Updates from Aremo and your coach.</p>
             </div>
             <button
               onClick={handleToggleNotifications}

@@ -3,7 +3,7 @@ import { DEFAULT_COACH_WHATSAPP, getCoachWhatsAppNumber } from "./coach-number"
 import { buildCoachWhatsAppLink } from "./coach-link"
 
 describe("getCoachWhatsAppNumber", () => {
-  it("defaults to the Drefit coach line when unset or blank", () => {
+  it("defaults to the Aremo coach line when unset or blank", () => {
     expect(DEFAULT_COACH_WHATSAPP).toBe("+2348165510842")
     expect(getCoachWhatsAppNumber(undefined)).toBe("+2348165510842")
     expect(getCoachWhatsAppNumber("")).toBe("+2348165510842")

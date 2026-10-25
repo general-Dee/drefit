@@ -41,7 +41,7 @@ export default function ReferralsPage() {
   }
 
   const shareText = info
-    ? `Train with me on Drefit — coach-designed workouts and Nigerian meal plans. Sign up with my link and we both get ${info.rewardDaysPerReferral} extra days: ${info.link}`
+    ? `Train with me on Aremo — coach-designed workouts and Nigerian meal plans. Sign up with my link and we both get ${info.rewardDaysPerReferral} extra days: ${info.link}`
     : ""
 
   return (

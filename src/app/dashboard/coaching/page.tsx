@@ -77,7 +77,7 @@ export default function CoachingPage() {
         <div className="flex items-center gap-3 border-b border-line px-4 py-3">
           <span className="icon-tile h-10 w-10 rounded-full"><MessageCircle className="h-[18px] w-[18px]" /></span>
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">Drefit coaching team</div>
+            <div className="truncate text-sm font-semibold">Aremo coaching team</div>
             <div className="text-xs text-ink-subtle">Usually replies within a day</div>
           </div>
         </div>

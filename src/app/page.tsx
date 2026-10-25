@@ -114,7 +114,7 @@ export default function Home() {
       {/* Features */}
       <section className="relative mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <div className="eyebrow mb-3">Why Drefit</div>
+          <div className="eyebrow mb-3">Why Aremo</div>
           <h2 className="font-display text-3xl font-bold md:text-5xl">Everything you need to succeed</h2>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -172,7 +172,7 @@ export default function Home() {
 
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 border-t border-white/[0.06] px-4 py-8 text-sm text-ink-subtle md:flex-row md:px-8">
         <Logo />
-        <span>© {new Date().getFullYear()} Drefit. Made in Nigeria.</span>
+        <span>© {new Date().getFullYear()} Aremo. Made in Nigeria.</span>
       </footer>
     </main>
   )

@@ -37,7 +37,11 @@ function needsSsl(url) {
 
 export async function connect(url = scriptDatabaseUrl()) {
   if (!url) throw new Error("DATABASE_URL is not set")
-  const client = new pg.Client({ connectionString: url, ssl: needsSsl(url) ? { rejectUnauthorized: true } : undefined })
+  const client = new pg.Client({
+    connectionString: url,
+    ssl: needsSsl(url) ? { rejectUnauthorized: true } : undefined,
+    connectionTimeoutMillis: 20_000, // fail (and let the build continue) instead of hanging
+  })
   await client.connect()
   return client
 }

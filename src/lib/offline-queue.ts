@@ -30,7 +30,7 @@ export function writeQueue(store: KV, queue: QueuedCompletion[]): void {
 }
 
 export function newClientId(rand: () => string = () => crypto.randomUUID()): string {
-  // Appwrite ids: <=36 chars of [a-zA-Z0-9._-], not starting with a special char.
+  // Ids stay Appwrite-compatible: <=36 chars of [a-zA-Z0-9._-], not starting with a special char.
   return `c${rand().replace(/-/g, "")}`.slice(0, 36)
 }
 

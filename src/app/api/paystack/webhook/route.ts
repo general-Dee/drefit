@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     // 4. Paystack requires a 200 to stop retrying.
     return NextResponse.json({ received: true, status: result.status })
   } catch (error) {
-    // Transient failure (Paystack/Appwrite): return 500 so Paystack retries.
+    // Transient failure (Paystack/database): return 500 so Paystack retries.
     console.error("paystack webhook error", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }

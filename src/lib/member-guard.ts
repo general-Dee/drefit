@@ -9,7 +9,7 @@ export type MemberAccessDecision =
 
 // Pure decision function (unit-tested): signed-in users need an active paid
 // period or an unexpired trial; admins are always allowed. The session values
-// are refreshed from Appwrite on every request by the NextAuth jwt callback,
+// are refreshed from the database on every request by the NextAuth jwt callback,
 // so webhook-driven subscription changes take effect without re-login.
 export function decideMemberAccess(session: Session | null | undefined): MemberAccessDecision {
   if (!session?.user?.id) {

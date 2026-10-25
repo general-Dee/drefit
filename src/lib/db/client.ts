@@ -18,7 +18,6 @@ type Collection = { table: string; fields: Record<string, [string, ColType]> }
 const COLLECTIONS = collectionsJson as unknown as Record<string, Collection>
 
 // Loosely typed like Appwrite's Models.Document so existing call sites keep compiling.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Doc = { $id: string; $createdAt: string; $updatedAt: string; [k: string]: any }
 export type DocumentList<T> = { total: number; documents: T[] }
 

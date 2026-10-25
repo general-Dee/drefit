@@ -2,7 +2,7 @@ import { createHash } from "crypto"
 import { db } from "@/lib/db/client"
 import { LOGIN_ATTEMPTS_COLLECTION_ID, type LoginAttemptDoc } from "@/lib/db/schema"
 
-// Persistent (Appwrite-backed) login throttling, so limits survive cold starts
+// Persistent (Postgres-backed) login throttling, so limits survive cold starts
 // and are shared across serverless instances. Failures are counted for every
 // submitted email whether or not an account exists, and the caller returns the
 // same generic error either way, so lockouts don't reveal which emails exist.
@@ -43,7 +43,7 @@ export function normalizeEmail(email: string): string {
 }
 
 export function attemptDocId(scope: LoginAttemptDoc["scope"], key: string): string {
-  // Appwrite ids: max 36 chars of [a-zA-Z0-9._-].
+  // Ids kept Appwrite-compatible (max 36 chars of [a-zA-Z0-9._-]) so imported rows line up.
   return createHash("sha256").update(`${scope}:${key}`).digest("hex").slice(0, 36)
 }
 

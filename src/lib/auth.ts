@@ -74,10 +74,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const ip = getClientIp(request)
         const { email, password } = parsed.data
-        // Persistent lockout (Appwrite-backed). Applied identically whether or
+        // Persistent lockout (Postgres-backed). Applied identically whether or
         // not the account exists, so it can't be used to enumerate emails.
         // The in-memory limiter is kept as a per-instance backstop in case the
-        // Appwrite-backed store is unavailable (it fails open).
+        // database-backed store is unavailable (it fails open).
         if (!rateLimit(`login:${ip}:${email.trim().toLowerCase()}`, 10, 60_000).success || (await isLoginLocked(ip, email))) {
           throw new RateLimitedSignin()
         }

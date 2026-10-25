@@ -4,16 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/migrate-appwrite.mjs",
+    "prebuild": "node scripts/migrate-db.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:migrate": "node --env-file=.env.local scripts/migrate-db.mjs",
+    "db:seed": "node --env-file=.env.local scripts/seed-db.mjs"
   },
   "dependencies": {
     "@paystack/inline-js": "^2.22.8",
     "@vercel/blob": "^2.8.2",
-    "appwrite": "^25.1.1",
     "bcryptjs": "^2.4.3",
     "canvas-confetti": "^1.9.2",
     "date-fns": "^3.2.0",
@@ -21,7 +22,6 @@
     "lucide-react": "^1.16.0",
     "next": "^14.2.35",
     "next-auth": "5.0.0-beta.32",
-    "node-appwrite": "^25.1.0",
     "pg": "^8.23.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

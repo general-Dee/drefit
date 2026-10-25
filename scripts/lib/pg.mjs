@@ -3,8 +3,26 @@ import { readFileSync } from "node:fs"
 import pg from "pg"
 
 /** Direct (unpooled) URL preferred for scripts: advisory locks + DDL need a real session. */
+// Prefer the direct (non-pooled) URL for DDL/advisory locks, but only when it
+// points at the same database as DATABASE_URL. That way overriding
+// DATABASE_URL (e.g. to a local Postgres) never silently falls through to a
+// remote unpooled URL left over in .env.local.
 export function scriptDatabaseUrl(env = process.env) {
-  return env.DATABASE_URL_UNPOOLED || env.POSTGRES_URL_NON_POOLING || env.DATABASE_URL || env.POSTGRES_URL || ""
+  const main = env.DATABASE_URL || env.POSTGRES_URL || ""
+  const direct = env.DATABASE_URL_UNPOOLED || env.POSTGRES_URL_NON_POOLING || ""
+  if (!main) return direct
+  if (direct && sameDatabase(main, direct)) return direct
+  return main
+}
+
+function sameDatabase(a, b) {
+  try {
+    const x = new URL(a), y = new URL(b)
+    const host = (u) => u.hostname.replace("-pooler.", ".")
+    return host(x) === host(y) && x.pathname === y.pathname
+  } catch {
+    return false
+  }
 }
 
 function needsSsl(url) {

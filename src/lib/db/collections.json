@@ -1,0 +1,612 @@
+{
+  "users": {
+    "table": "users",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "name": [
+        "name",
+        "text"
+      ],
+      "email": [
+        "email",
+        "text"
+      ],
+      "password": [
+        "password",
+        "text"
+      ],
+      "role": [
+        "role",
+        "text"
+      ],
+      "subscriptionStatus": [
+        "subscription_status",
+        "text"
+      ],
+      "subscriptionId": [
+        "subscription_id",
+        "text"
+      ],
+      "subscriptionCurrentPeriodEnd": [
+        "subscription_current_period_end",
+        "timestamptz"
+      ],
+      "trialEndsAt": [
+        "trial_ends_at",
+        "timestamptz"
+      ],
+      "fitnessGoal": [
+        "fitness_goal",
+        "text"
+      ],
+      "fitnessLevel": [
+        "fitness_level",
+        "text"
+      ],
+      "dietaryPreference": [
+        "dietary_preference",
+        "text"
+      ],
+      "schedule": [
+        "schedule",
+        "text"
+      ],
+      "passwordResetTokenHash": [
+        "password_reset_token_hash",
+        "text"
+      ],
+      "passwordResetExpires": [
+        "password_reset_expires",
+        "timestamptz"
+      ],
+      "notificationsEnabled": [
+        "notifications_enabled",
+        "bool"
+      ],
+      "phone": [
+        "phone",
+        "text"
+      ],
+      "whatsappOptIn": [
+        "whatsapp_opt_in",
+        "bool"
+      ],
+      "reminderHour": [
+        "reminder_hour",
+        "int"
+      ],
+      "referralCode": [
+        "referral_code",
+        "text"
+      ],
+      "referredBy": [
+        "referred_by",
+        "text"
+      ],
+      "daysPerWeek": [
+        "days_per_week",
+        "int"
+      ],
+      "equipment": [
+        "equipment",
+        "text"
+      ],
+      "limitationsJson": [
+        "limitations_json",
+        "text"
+      ],
+      "limitationsNote": [
+        "limitations_note",
+        "text"
+      ]
+    }
+  },
+  "progressLogs": {
+    "table": "progress_logs",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "weight": [
+        "weight",
+        "float"
+      ],
+      "loggedAt": [
+        "logged_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "progressPhotos": {
+    "table": "progress_photos",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "fileId": [
+        "file_id",
+        "text"
+      ],
+      "takenAt": [
+        "taken_at",
+        "timestamptz"
+      ],
+      "blobPathname": [
+        "blob_pathname",
+        "text"
+      ],
+      "contentType": [
+        "content_type",
+        "text"
+      ]
+    }
+  },
+  "workouts": {
+    "table": "workouts",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "name": [
+        "name",
+        "text"
+      ],
+      "muscleGroup": [
+        "muscle_group",
+        "text"
+      ],
+      "duration": [
+        "duration",
+        "int"
+      ],
+      "difficulty": [
+        "difficulty",
+        "text"
+      ],
+      "calories": [
+        "calories",
+        "int"
+      ],
+      "goal": [
+        "goal",
+        "text"
+      ],
+      "exercisesJson": [
+        "exercises_json",
+        "text"
+      ]
+    }
+  },
+  "workoutCompletions": {
+    "table": "workout_completions",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "workoutId": [
+        "workout_id",
+        "text"
+      ],
+      "completedAt": [
+        "completed_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "dietPlans": {
+    "table": "diet_plans",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "dietaryPreference": [
+        "dietary_preference",
+        "text"
+      ],
+      "day": [
+        "day",
+        "text"
+      ],
+      "breakfast": [
+        "breakfast",
+        "text"
+      ],
+      "lunch": [
+        "lunch",
+        "text"
+      ],
+      "dinner": [
+        "dinner",
+        "text"
+      ],
+      "snack": [
+        "snack",
+        "text"
+      ]
+    }
+  },
+  "communityPosts": {
+    "table": "community_posts",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "userName": [
+        "user_name",
+        "text"
+      ],
+      "content": [
+        "content",
+        "text"
+      ],
+      "likedBy": [
+        "liked_by",
+        "text[]"
+      ],
+      "createdAt": [
+        "created_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "communityComments": {
+    "table": "community_comments",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "postId": [
+        "post_id",
+        "text"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "userName": [
+        "user_name",
+        "text"
+      ],
+      "content": [
+        "content",
+        "text"
+      ],
+      "createdAt": [
+        "created_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "coachingMessages": {
+    "table": "coaching_messages",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "senderId": [
+        "sender_id",
+        "text"
+      ],
+      "senderName": [
+        "sender_name",
+        "text"
+      ],
+      "isFromAdmin": [
+        "is_from_admin",
+        "bool"
+      ],
+      "content": [
+        "content",
+        "text"
+      ],
+      "createdAt": [
+        "created_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "loginAttempts": {
+    "table": "login_attempts",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "scope": [
+        "scope",
+        "text"
+      ],
+      "failures": [
+        "failures",
+        "int"
+      ],
+      "windowStart": [
+        "window_start",
+        "timestamptz"
+      ],
+      "lockedUntil": [
+        "locked_until",
+        "timestamptz"
+      ]
+    }
+  },
+  "paymentEvents": {
+    "table": "payment_events",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "reference": [
+        "reference",
+        "text"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "amount": [
+        "amount",
+        "int"
+      ],
+      "currency": [
+        "currency",
+        "text"
+      ],
+      "source": [
+        "source",
+        "text"
+      ],
+      "processedAt": [
+        "processed_at",
+        "timestamptz"
+      ],
+      "periodEnd": [
+        "period_end",
+        "timestamptz"
+      ]
+    }
+  },
+  "reminderLog": {
+    "table": "reminder_log",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "type": [
+        "type",
+        "text"
+      ],
+      "day": [
+        "day",
+        "text"
+      ],
+      "status": [
+        "status",
+        "text"
+      ],
+      "createdAt": [
+        "created_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "referrals": {
+    "table": "referrals",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "referrerId": [
+        "referrer_id",
+        "text"
+      ],
+      "referredId": [
+        "referred_id",
+        "text"
+      ],
+      "status": [
+        "status",
+        "text"
+      ],
+      "reason": [
+        "reason",
+        "text"
+      ],
+      "reference": [
+        "reference",
+        "text"
+      ],
+      "rewardDays": [
+        "reward_days",
+        "int"
+      ],
+      "referrerRewarded": [
+        "referrer_rewarded",
+        "bool"
+      ],
+      "referredRewarded": [
+        "referred_rewarded",
+        "bool"
+      ],
+      "createdAt": [
+        "created_at",
+        "timestamptz"
+      ]
+    }
+  },
+  "firstWeekPlans": {
+    "table": "first_week_plans",
+    "fields": {
+      "$id": [
+        "id",
+        "text"
+      ],
+      "$createdAt": [
+        "created_at",
+        "timestamptz"
+      ],
+      "$updatedAt": [
+        "updated_at",
+        "timestamptz"
+      ],
+      "userId": [
+        "user_id",
+        "text"
+      ],
+      "planJson": [
+        "plan_json",
+        "text"
+      ],
+      "rulesVersion": [
+        "rules_version",
+        "int"
+      ],
+      "generatedAt": [
+        "generated_at",
+        "timestamptz"
+      ]
+    }
+  }
+}

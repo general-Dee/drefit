@@ -67,7 +67,7 @@ export default function RegisterPage() {
 
   return (
     <AuthShell
-      title="Join Drefit"
+      title="Join Aremo"
       subtitle="Start your 7-day free trial. Cancel anytime."
       footer={<>Already have an account? <Link href="/login" className="font-semibold text-accent">Sign in</Link></>}
     >

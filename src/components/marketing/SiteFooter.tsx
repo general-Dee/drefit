@@ -2,7 +2,7 @@ import Link from "next/link"
 import Logo from "@/components/ui/Logo"
 
 const cols = [
-  { title: "Drefit", links: [{ href: "/#how-it-works", label: "How it works" }, { href: "/#membership", label: "Membership" }, { href: "/#pricing", label: "Pricing" }, { href: "/#mission", label: "Our mission" }] },
+  { title: "Aremo", links: [{ href: "/#how-it-works", label: "How it works" }, { href: "/#membership", label: "Membership" }, { href: "/#pricing", label: "Pricing" }, { href: "/#mission", label: "Our mission" }] },
   { title: "Members", links: [{ href: "/register", label: "Start free trial" }, { href: "/login", label: "Sign in" }, { href: "/subscription", label: "Renew membership" }, { href: "/#faq", label: "FAQ" }] },
 ]
 
@@ -30,7 +30,7 @@ export default function SiteFooter() {
         ))}
       </div>
       <div className="mk-shell flex flex-col gap-2 border-t border-line py-6 text-xs text-ink-subtle sm:flex-row sm:items-center sm:justify-between">
-        <span>© {new Date().getFullYear()} Drefit. Made in Nigeria.</span>
+        <span>© {new Date().getFullYear()} Aremo. Made in Nigeria.</span>
         <span>Payments processed securely by Paystack.</span>
       </div>
     </footer>

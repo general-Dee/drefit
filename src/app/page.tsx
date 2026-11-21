@@ -12,11 +12,11 @@ import Photo from "@/components/marketing/Photo"
 import { PHOTOS } from "@/components/marketing/images"
 
 export const metadata: Metadata = {
-  title: "Drefit · Coach-designed fitness and Nigerian meal plans",
+  title: "Aremo · Coach-designed fitness and Nigerian meal plans",
   description:
     "Workouts built around your goal, your equipment and your week, meal plans built on Nigerian food, and a coach in your corner. Start with a 7-day free trial, no card needed.",
   openGraph: {
-    title: "Drefit · Train like a champion. Eat like one too.",
+    title: "Aremo · Train like a champion. Eat like one too.",
     description: "Coach-designed workouts, Nigerian meal plans and a coach in your corner. 7-day free trial, no card needed.",
     type: "website",
   },
@@ -49,7 +49,7 @@ const included = [
   { icon: MessageCircle, title: "A coach in your corner", body: "Private one-to-one chat with your coach for form questions, bad weeks and plan changes." },
   { icon: LineChart, title: "Progress you can see", body: "Streaks, a weight trend line and a before-and-after photo slider that show the change week by week." },
   { icon: Users, title: "A community that shows up", body: "Share wins, cheer others on and keep each other honest on the community feed and leaderboard." },
-  { icon: WifiOff, title: "Works when the network doesn't", body: "Install Drefit on your phone. Workouts you've opened stay available offline and completions sync when you're back." },
+  { icon: WifiOff, title: "Works when the network doesn't", body: "Install Aremo on your phone. Workouts you've opened stay available offline and completions sync when you're back." },
 ]
 
 const pricingPerks = [
@@ -65,9 +65,9 @@ const faqs = [
   { q: "Do I need a gym?", a: "No. During setup you choose no equipment, a home kit (dumbbells, bands, a kettlebell) or a full gym, and your plan is built from workouts that fit." },
   { q: `What happens after the ${TRIAL_DAYS}-day trial?`, a: `Your trial is free and needs no card. When it ends, one payment of ${price} through Paystack unlocks ${PLAN_PERIOD_DAYS} days of full access.` },
   { q: "Will I be charged automatically?", a: `No. Each payment covers ${PLAN_PERIOD_DAYS} days and nothing renews behind your back. If you renew early, the new ${PLAN_PERIOD_DAYS} days are added on top of the days you have left.` },
-  { q: "I have an injury. Is Drefit for me?", a: "Tell us about knees, lower back, shoulders, wrists or a need for low-impact training during setup and we'll leave out workouts that could aggravate them. Your coach is a message away if you're unsure about anything." },
+  { q: "I have an injury. Is Aremo for me?", a: "Tell us about knees, lower back, shoulders, wrists or a need for low-impact training during setup and we'll leave out workouts that could aggravate them. Your coach is a message away if you're unsure about anything." },
   { q: "Can the meal plans fit how I eat?", a: "Yes. Choose everything, vegetarian, keto/low-carb or halal, and your weekday meals are matched to it." },
-  { q: "Is my payment secure?", a: "Payments are handled by Paystack in their own secure window. Drefit never sees or stores your card details." },
+  { q: "Is my payment secure?", a: "Payments are handled by Paystack in their own secure window. Aremo never sees or stores your card details." },
 ]
 
 function Kicker({ children, center = false }: { children: React.ReactNode; center?: boolean }) {
@@ -174,12 +174,12 @@ export default function Home() {
         <section id="how-it-works" aria-labelledby="plan-title" className="mk-section scroll-mt-20 bg-surface-1/60">
           <div className="mk-shell">
             <Reveal className="mx-auto max-w-3xl text-center">
-              <Kicker center>How Drefit works</Kicker>
+              <Kicker center>How Aremo works</Kicker>
               <h2 id="plan-title" className="display-2 mt-6">
                 A plan made for your life, and a coach who <span className="serif-em text-accent">stays.</span>
               </h2>
               <p className="lede mx-auto mt-6">
-                We know a plan only works if it fits the week you actually have. So every Drefit plan starts with you, and your coach is a message away whenever it needs to bend.
+                We know a plan only works if it fits the week you actually have. So every Aremo plan starts with you, and your coach is a message away whenever it needs to bend.
               </p>
             </Reveal>
             <ol className="mt-16 grid gap-6 md:mt-20 md:grid-cols-3">
@@ -302,7 +302,7 @@ export default function Home() {
                   World-class coaching should feel personal, affordable and <span className="serif-em text-accent">unmistakably Nigerian.</span>
                 </h2>
                 <p className="lede mt-8">
-                  Drefit exists so that getting strong, healthy and confident never depends on where you live, what you can afford or whether you can find quinoa. We build every plan around your goal, your schedule, your equipment and your kitchen, and we stay in your corner until the results show up, then we help you keep them.
+                  Aremo exists so that getting strong, healthy and confident never depends on where you live, what you can afford or whether you can find quinoa. We build every plan around your goal, your schedule, your equipment and your kitchen, and we stay in your corner until the results show up, then we help you keep them.
                 </p>
               </Reveal>
               <dl className="mt-12 grid gap-8 border-t border-line pt-10 sm:grid-cols-3">
@@ -338,7 +338,7 @@ export default function Home() {
                 </ul>
               </Reveal>
               <Reveal delay={0.1} className="relative overflow-hidden rounded-3xl border border-accent/30 bg-accent/[0.05] p-8 md:p-10">
-                <div className="eyebrow">With Drefit</div>
+                <div className="eyebrow">With Aremo</div>
                 <ul className="mt-6 space-y-4">
                   {["A routine you can keep, on the days you can actually train", "Stronger, fitter and more energy for everything else", "Meals you look forward to, built on food you love", "Progress you can see in your photos, your trend line and your streak"].map((t) => (
                     <li key={t} className="flex gap-3 text-ink"><Check className="mt-0.5 h-5 w-5 text-accent" />{t}</li>

@@ -120,7 +120,7 @@ export default function SubscriptionPage() {
     ? new Date(periodEnd).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })
     : null
 
-  const title = isRenewal ? "Renew your membership" : hasTimeLeft ? `Add ${PLAN_PERIOD_DAYS} more days` : "Unlock Drefit Premium"
+  const title = isRenewal ? "Renew your membership" : hasTimeLeft ? `Add ${PLAN_PERIOD_DAYS} more days` : "Unlock Aremo Premium"
   const subtitle = isRenewal
     ? "Your last 30 days have ended. Renew to pick up exactly where you left off."
     : hasTimeLeft
@@ -145,7 +145,7 @@ export default function SubscriptionPage() {
 
       <main className="mk-shell relative pb-20 pt-6 md:pb-28 md:pt-10">
         <Link href="/" className="inline-flex items-center gap-1.5 rounded-md text-sm text-ink-muted transition-colors duration-base hover:text-ink">
-          <ArrowLeft className="h-4 w-4" /> Back to Drefit
+          <ArrowLeft className="h-4 w-4" /> Back to Aremo
         </Link>
 
         <div className="fade-up mt-8 max-w-2xl">
@@ -160,7 +160,7 @@ export default function SubscriptionPage() {
             <h2 id="summary-title" className="label-caps">Order summary</h2>
             <div className="mt-6 flex items-start justify-between gap-4">
               <div>
-                <div className="font-display text-lg font-semibold">Drefit Premium</div>
+                <div className="font-display text-lg font-semibold">Aremo Premium</div>
                 <div className="mt-1 text-sm text-ink-muted">{PLAN_PERIOD_DAYS} days of full access</div>
               </div>
               <div className="font-display text-lg font-semibold tabular-nums">{price}</div>
@@ -205,18 +205,18 @@ export default function SubscriptionPage() {
                   ? "Loading secure payment form…"
                   : signedIn
                     ? "You'll complete payment in Paystack's secure window."
-                    : "Sign in to your Drefit account to pay."}
+                    : "Sign in to your Aremo account to pay."}
             </p>
             {!signedIn && status !== "loading" && (
               <p className="mt-4 text-center text-sm text-ink-muted">
-                New to Drefit?{" "}
+                New to Aremo?{" "}
                 <Link href="/register" className="font-medium text-accent underline-offset-4 hover:underline">Start your {TRIAL_DAYS}-day free trial</Link>
               </p>
             )}
 
             <ul className="mt-8 space-y-3 border-t border-line pt-6 text-sm">
               {[
-                { icon: CreditCard, t: "Drefit never sees or stores your card details" },
+                { icon: CreditCard, t: "Aremo never sees or stores your card details" },
                 { icon: RefreshCw, t: "No automatic charges. Renew only when you want to" },
                 { icon: Check, t: "Renew early and your remaining days carry over" },
               ].map((r) => (

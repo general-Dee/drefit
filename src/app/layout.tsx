@@ -3,10 +3,10 @@ import "./globals.css"
 import { Providers } from "./providers"
 import { bodyFont, displayFont } from "./fonts"
 export const metadata: Metadata = {
-  title: "Drefit - Elite Fitness Coaching Nigeria",
+  title: "Aremo - Elite Fitness Coaching Nigeria",
   description: "Personalized coaching, coach-designed diet plans, and community support.",
-  applicationName: "Drefit",
-  appleWebApp: { capable: true, title: "Drefit", statusBarStyle: "black-translucent" },
+  applicationName: "Aremo",
+  appleWebApp: { capable: true, title: "Aremo", statusBarStyle: "black-translucent" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 }
 export const viewport: Viewport = {

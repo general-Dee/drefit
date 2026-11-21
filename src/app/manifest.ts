@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Drefit - Elite Fitness Coaching",
-    short_name: "Drefit",
+    name: "Aremo - Elite Fitness Coaching",
+    short_name: "Aremo",
     description: "Coach-designed workouts, Nigerian meal plans and progress tracking.",
     start_url: "/dashboard",
     scope: "/",

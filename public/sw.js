@@ -1,4 +1,4 @@
-/* Drefit service worker (hand-written, no build step).
+/* Aremo service worker (hand-written, no build step).
  * - App shell + static assets: cache-first (/_next/static, icons, offline page)
  * - GET /api/workouts and /api/workouts/:id: stale-while-revalidate
  * - Navigations / RSC requests for /dashboard/workouts*: network-first,

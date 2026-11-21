@@ -1,6 +1,6 @@
 // Unsplash photography (free Unsplash License), served straight from
 // images.unsplash.com so it does not use Vercel image optimisation.
-// Placeholder imagery until Drefit has its own shoot of real members/coaches.
+// Placeholder imagery until Aremo has its own shoot of real members/coaches.
 const u = (id: string, w: number) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=75&w=${w}`
 
 export const PHOTOS = {

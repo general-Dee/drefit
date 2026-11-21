@@ -5,7 +5,7 @@ import { getCoachWhatsAppNumber } from "@/lib/whatsapp/coach-number"
 
 // Uses NEXT_PUBLIC_COACH_WHATSAPP, falling back to the default coach line.
 export default function CoachWhatsAppButton({ className = "" }: { className?: string }) {
-  const href = buildCoachWhatsAppLink(getCoachWhatsAppNumber(process.env.NEXT_PUBLIC_COACH_WHATSAPP), "Hi coach, I'm messaging from Drefit.")
+  const href = buildCoachWhatsAppLink(getCoachWhatsAppNumber(process.env.NEXT_PUBLIC_COACH_WHATSAPP), "Hi coach, I'm messaging from Aremo.")
   if (!href) return null
   return (
     <a

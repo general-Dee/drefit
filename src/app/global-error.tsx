@@ -10,7 +10,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       <body>
         <ErrorScreen
           icon={ServerCrash}
-          title="Drefit hit a snag"
+          title="Aremo hit a snag"
           description="A critical error occurred. Please try again."
           onRetry={reset}
           homeHref="/"

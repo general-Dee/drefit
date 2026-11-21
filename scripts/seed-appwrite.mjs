@@ -7,6 +7,7 @@
 
 import { Client, Databases, Storage, ID, Query, DatabasesIndexType, OrderBy } from "node-appwrite"
 import { ensureSecuritySchema } from "./appwrite-security-schema.mjs"
+import { ensureUpgradesSchema } from "./appwrite-upgrades-schema.mjs"
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID
 const client = new Client()
@@ -227,6 +228,7 @@ async function main() {
 
   // --- loginAttempts + paymentEvents (security) ---
   await ensureSecuritySchema(databases, DATABASE_ID)
+  await ensureUpgradesSchema(databases, DATABASE_ID)
 
   // --- progress-photos bucket ---
   await ensureBucket("progress-photos", "Progress Photos")

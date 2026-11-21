@@ -35,6 +35,18 @@ export interface AppwriteUserDoc {
   passwordResetTokenHash?: string
   passwordResetExpires?: string
   notificationsEnabled?: boolean
+  // WhatsApp reminders (E.164 phone, explicit opt-in, Lagos hour 0-23)
+  phone?: string | null
+  whatsappOptIn?: boolean | null
+  reminderHour?: number | null
+  // Referrals: this user's share code and the referrer's user $id
+  referralCode?: string | null
+  referredBy?: string | null
+  // Onboarding (upgrade 5)
+  daysPerWeek?: number | null
+  equipment?: "none" | "home" | "gym" | null
+  limitationsJson?: string | null
+  limitationsNote?: string | null
 }
 
 // Documents in the `progressLogs` collection.
@@ -156,4 +168,45 @@ export interface PaymentEventDoc {
   source: "webhook" | "verify"
   processedAt: string
   periodEnd?: string
+}
+
+// Customer upgrades (provisioned by scripts/appwrite-upgrades-schema.mjs).
+export const REMINDER_LOG_COLLECTION_ID = "reminderLog"
+
+// One document per (user, reminder type, Lagos day) — the dedupe record.
+export interface ReminderLogDoc {
+  $id: string
+  userId: string
+  type: string
+  day: string
+  status: "sending" | "sent"
+  createdAt: string
+}
+
+export const REFERRALS_COLLECTION_ID = "referrals"
+
+// One document per referred user ($id derived from referredId, unique index
+// on referredId), so a referral can only ever be rewarded once.
+export interface ReferralDoc {
+  $id: string
+  referrerId: string
+  referredId: string
+  status: "processing" | "rewarded" | "rejected"
+  reason?: string | null
+  reference?: string | null
+  rewardDays?: number
+  referrerRewarded?: boolean
+  referredRewarded?: boolean
+  createdAt: string
+}
+
+export const FIRST_WEEK_PLANS_COLLECTION_ID = "firstWeekPlans"
+
+// One document per user ($id = user $id) holding the generated plan.
+export interface FirstWeekPlanDoc {
+  $id: string
+  userId: string
+  planJson: string
+  rulesVersion?: number
+  generatedAt: string
 }

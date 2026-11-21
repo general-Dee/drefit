@@ -1,14 +1,10 @@
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
 import DietPlanForm from "../DietPlanForm"
 
 export default function NewDietPlanPage() {
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
-      <Link href="/admin/diet" className="flex items-center gap-2 text-drefit-lime">
-        <ArrowLeft className="w-4 h-4" /> Back to Diet Plans
-      </Link>
-      <h1 className="text-3xl">New Diet Plan</h1>
+    <div className="page-shell max-w-2xl">
+      <PageHeader back={{ href: "/admin/diet", label: "Diet plans" }} title="New diet plan" subtitle="One day of meals for a dietary preference." />
       <DietPlanForm />
     </div>
   )

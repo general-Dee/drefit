@@ -1,8 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import PageHeader from "@/components/ui/PageHeader"
 import toast from "react-hot-toast"
 import type { WorkoutDoc } from "@/lib/appwrite/schema"
 import WorkoutForm from "../../WorkoutForm"
@@ -27,13 +26,10 @@ export default function EditWorkoutPage({ params }: { params: { id: string } }) 
   }, [params.id, router])
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
-      <Link href="/admin/workouts" className="flex items-center gap-2 text-drefit-lime">
-        <ArrowLeft className="w-4 h-4" /> Back to Workouts
-      </Link>
-      <h1 className="text-3xl">Edit Workout</h1>
+    <div className="page-shell max-w-2xl">
+      <PageHeader back={{ href: "/admin/workouts", label: "Workouts" }} title="Edit workout" subtitle="Changes go live for members on save." />
       {loading ? (
-        <div className="glass-card p-4 h-48 animate-pulse" />
+        <div className="skeleton w-full h-[560px]" />
       ) : workout ? (
         <WorkoutForm initialWorkout={workout} />
       ) : null}

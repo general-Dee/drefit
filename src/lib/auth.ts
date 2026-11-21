@@ -12,6 +12,8 @@ import { TRIAL_DAYS } from "@/lib/paystack/plan"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
 import { isLoginLocked, recordLoginFailure, clearLoginFailures } from "@/lib/login-throttle"
 import { isAdminEmail, resolveRole } from "@/lib/admin"
+import { cookies } from "next/headers"
+import { generateReferralCode, resolveReferrerId, REFERRAL_COOKIE } from "@/lib/referrals"
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(6) })
 
@@ -40,6 +42,13 @@ async function findOrCreateGoogleUser(email: string, name: string): Promise<Appw
 
   const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString()
   const unusablePassword = await hash(randomUUID(), 10) // Google users never log in with a password
+  // Referral code captured on /register?ref=… before choosing Google sign-in.
+  let referredBy: string | null = null
+  try {
+    referredBy = await resolveReferrerId(cookies().get(REFERRAL_COOKIE)?.value, email)
+  } catch {
+    referredBy = null
+  }
   const doc = await serverDatabases.createDocument(DATABASE_ID, USERS_COLLECTION_ID, ID.unique(), {
     name,
     email,
@@ -47,6 +56,8 @@ async function findOrCreateGoogleUser(email: string, name: string): Promise<Appw
     role: isAdminEmail(email) ? "admin" : "user",
     subscriptionStatus: "trialing",
     trialEndsAt,
+    referralCode: generateReferralCode(),
+    ...(referredBy ? { referredBy } : {}),
   })
   return doc as unknown as AppwriteUserDoc
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { applyVerifiedCharge, fetchVerifiedTransaction, isValidReference } from "@/lib/paystack/charge"
+import { notifyPaymentFailed } from "@/lib/whatsapp/payment-failed"
 
 // Client-callback path: after checkout the browser sends the reference here.
 // Access is only granted after confirming the transaction with Paystack's
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
       case "duplicate":
         return NextResponse.json({ success: true, status: "already_processed" })
       case "rejected":
+        if (tx.status === "failed") await notifyPaymentFailed(tx, session.user.id)
         return NextResponse.json(
           { error: "This payment was not successful or doesn't match the plan, so no access was granted.", code: "PAYMENT_NOT_VALID" },
           { status: 402 }

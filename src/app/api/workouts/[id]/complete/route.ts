@@ -1,26 +1,47 @@
 import { NextRequest, NextResponse } from "next/server"
 import { ID, Permission, Role } from "node-appwrite"
+import { z } from "zod"
 import { requireMember } from "@/lib/member-guard"
 import { serverDatabases } from "@/lib/appwrite/server"
 import { DATABASE_ID, WORKOUT_COMPLETIONS_COLLECTION_ID } from "@/lib/appwrite/schema"
+import { resolveCompletedAt } from "@/lib/completion-time"
+
+// Optional body from the offline queue: a client-generated id (used as the
+// document id so replays are idempotent) and the time it was completed.
+const bodySchema = z
+  .object({
+    clientId: z.string().regex(/^c[a-f0-9]{1,35}$/).optional(),
+    completedAt: z.string().datetime({ offset: true }).optional(),
+  })
+  .partial()
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const gate = await requireMember()
   if (gate.error) return gate.error
   const session = gate.session
 
-  const userId = session.user.id
-  const completion = await serverDatabases.createDocument(
-    DATABASE_ID,
-    WORKOUT_COMPLETIONS_COLLECTION_ID,
-    ID.unique(),
-    {
-      userId,
-      workoutId: params.id,
-      completedAt: new Date().toISOString(),
-    },
-    [Permission.read(Role.user(userId)), Permission.write(Role.user(userId))]
-  )
+  const raw = await req.json().catch(() => ({}))
+  const parsed = bodySchema.safeParse(raw ?? {})
+  const body = parsed.success ? parsed.data : {}
 
-  return NextResponse.json({ success: true, completion })
+  const userId = session.user.id
+  try {
+    const completion = await serverDatabases.createDocument(
+      DATABASE_ID,
+      WORKOUT_COMPLETIONS_COLLECTION_ID,
+      body.clientId ?? ID.unique(),
+      {
+        userId,
+        workoutId: params.id,
+        completedAt: resolveCompletedAt(body.completedAt, new Date()),
+      },
+      [Permission.read(Role.user(userId)), Permission.write(Role.user(userId))]
+    )
+    return NextResponse.json({ success: true, completion })
+  } catch (err) {
+    if ((err as { code?: number })?.code === 409) {
+      return NextResponse.json({ success: true, duplicate: true }, { status: 409 })
+    }
+    throw err
+  }
 }

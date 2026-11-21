@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { Query } from "node-appwrite"
+import { computeStreaks } from "@/lib/progress"
+import { lagosDateKey } from "@/lib/lagos-time"
 import { requireMember } from "@/lib/member-guard"
 import { serverDatabases } from "@/lib/appwrite/server"
 import {
@@ -49,34 +51,22 @@ export async function GET() {
   }
 
   const now = new Date()
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const todayKey = lagosDateKey(now)
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
   let caloriesToday = 0
   let workoutsThisWeek = 0
-  const completedDays = new Set<string>()
 
   for (const completion of completions) {
     const completedAt = new Date(completion.completedAt)
-    if (completedAt >= startOfToday) {
+    if (lagosDateKey(completedAt) === todayKey) {
       caloriesToday += caloriesByWorkoutId.get(completion.workoutId) ?? 0
     }
     if (completedAt >= sevenDaysAgo) workoutsThisWeek += 1
-    completedDays.add(completedAt.toDateString())
   }
 
-  // Streak counts consecutive completed days ending today; if today has no
-  // completion yet, it falls back to yesterday so the streak doesn't zero
-  // out before the user has had a chance to work out today.
-  let streakDays = 0
-  const cursor = new Date(startOfToday)
-  if (!completedDays.has(cursor.toDateString())) {
-    cursor.setDate(cursor.getDate() - 1)
-  }
-  while (completedDays.has(cursor.toDateString())) {
-    streakDays += 1
-    cursor.setDate(cursor.getDate() - 1)
-  }
+  // Lagos-calendar streak (shared with the progress dashboard).
+  const streakDays = computeStreaks(completions.map((c) => c.completedAt), now).current
 
   const progressDeltaKg = logs.length >= 2 ? logs[logs.length - 1].weight - logs[0].weight : null
 
